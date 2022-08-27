@@ -1,13 +1,12 @@
 #include <iostream>
 
-#include "PeerConnectionObject.h"
+#include "WebRTCPlugin.h"
+#include "Context.h"
 
 using namespace webrtc;
-
 int main() {
-  rtc::scoped_refptr<PeerConnectionObject> obj =
-      rtc::scoped_refptr<PeerConnectionObject>(
-          new rtc::RefCountedObject<PeerConnectionObject>());
-
-          std::cout << "hello world" std::endl;
+  WebRTCPlugin plugin;
+  plugin.Print();
+    Context ctx;
+  plugin.ContextCreatePeerConnection(&ctx);
 }

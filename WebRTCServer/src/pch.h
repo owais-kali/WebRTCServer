@@ -39,7 +39,7 @@
 
 #include "media/engine/internal_encoder_factory.h"
 #include "media/engine/internal_decoder_factory.h"
-#include "media/base/h264_profile_level_id.h"
+#include "api/video_codecs/h264_profile_level_id.h"
 #include "media/base/adapted_video_track_source.h"
 #include "media/base/media_channel.h"
 #include "media/base/video_common.h"
@@ -59,10 +59,6 @@
 #include "pc/local_audio_source.h"
 
 #pragma endregion
-
-//#include "PlatformBase.h"
-#include "IUnityGraphics.h"
-#include "IUnityRenderingExtensions.h"
 
 #if SUPPORT_D3D11
 #include <comdef.h>
@@ -112,9 +108,6 @@
 
 // audio codec isac
 #define WEBRTC_USE_BUILTIN_ISAC_FLOAT 1
-
-namespace unity
-{
 namespace webrtc
 {
 
@@ -150,4 +143,3 @@ namespace webrtc
 
     const uint32 bufferedFrameNum = 3;
 } // end namespace webrtc
-} // end namespace unity

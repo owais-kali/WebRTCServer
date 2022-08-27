@@ -1,15 +1,13 @@
 #pragma once
-#include "WebRTCPlugin.h"
-#include "pch.h"
+#include "PeerConnectionObject.h"
 
-namespace webrtc
-{
-    using namespace ::webrtc;
-    class Context
-    {
+namespace webrtc {
 
+enum class RTCSdpType;
 
-    };
-    extern RTCSdpType ConvertSdpType(webrtc::SdpType type);
-}
-
+class Context {
+  PeerConnectionObject* CreatePeerConnection(
+      const webrtc::PeerConnectionInterface::RTCConfiguration& config);
+};
+extern RTCSdpType ConvertSdpType(webrtc::SdpType type);
+}  // namespace webrtc

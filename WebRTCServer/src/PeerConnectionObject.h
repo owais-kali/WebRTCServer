@@ -1,25 +1,12 @@
 #pragma once
-#include "pch.h"
-#include "Context.h"
-// #include "api/media_stream_interface.h"
-// #include "api/peer_connection_interface.h"
-// #include "examples/peerconnection/client/main_wnd.h"
-// #include "examples/peerconnection/client/peer_connection_client.h"
-// #include "rtc_base/thread.h"
+#include "WebRTCPlugin.h"
 
 namespace webrtc
 {
     using namespace webrtc;
 
     class PeerConnectionObject;
-
-    enum class RTCSdpType
-    {
-        Offer,
-        PrAnswer,
-        Answer,
-        Rollback
-    };
+    enum class RTCSdpType;
 
     using DelegateCreateSDSuccess = void(*)(PeerConnectionObject*, RTCSdpType, const char*);
     using DelegateCreateSDFailure = void(*)(PeerConnectionObject*, webrtc::RTCErrorType, const char*);

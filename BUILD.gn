@@ -803,8 +803,13 @@ if (is_linux || is_chromeos || is_win) {
     ]
     if (is_linux || is_chromeos) {
       sources += [
+        "WebRTCServer/src/WebRTCPlugin.cc",
+        "WebRTCServer/src/WebRTCPlugin.h",
+        "WebRTCServer/src/PeerConnectionObject.cc",
+        "WebRTCServer/src/PeerConnectionObject.h",
+        "WebRTCServer/src/Context.h",
+        "WebRTCServer/src/Context.cc",
         "WebRTCServer/src/main.cc",
-        "WebRTCServer/src/PeerConnectionObject.cc"
       ]
       cflags = [ "-Wno-deprecated-declarations" ]
       libs = [
