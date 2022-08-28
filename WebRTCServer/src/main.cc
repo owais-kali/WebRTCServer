@@ -14,8 +14,8 @@ int main() {
   Context ctx;
   PeerConnectionObject* pco = plugin.ContextCreatePeerConnection(&ctx);
 
-  // const RTCOfferAnswerOptions options{};
-  // plugin.PeerConnectionCreateOffer(pco, &options);
+  const RTCOfferAnswerOptions options{};
+  plugin.PeerConnectionCreateOffer(pco, &options);
 
 
   std::cout << "Press Enter to Continue!" << std::endl;

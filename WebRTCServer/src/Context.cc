@@ -1,12 +1,34 @@
 #pragma clang diagnostic ignored "-Wunreachable-code"
 #include "Context.h"
-
+#include "api/task_queue/default_task_queue_factory.h"
+#include "api/audio_codecs/builtin_audio_encoder_factory.h"
+#include "api/audio_codecs/builtin_audio_decoder_factory.h"
+#include <iostream>
 namespace webrtc {
 
 using namespace webrtc;
 
-Context::Context(){
+Context::Context()
+    : m_workerThread(rtc::Thread::CreateWithSocketServer()),
+      m_signalingThread(rtc::Thread::CreateWithSocketServer()),
+      m_taskQueueFactory(CreateDefaultTaskQueueFactory()) {
+  m_workerThread->Start();
+  m_signalingThread->Start();
+
+  rtc::InitializeSSL();
+
+  m_peerConnectionFactory = webrtc::CreatePeerConnectionFactory(
+      m_workerThread.get() /* network_thread */, m_workerThread.get() /* worker_thread */,
+      m_signalingThread.get(), nullptr /* default_adm */,
+      CreateBuiltinAudioEncoderFactory(),
+      CreateBuiltinAudioDecoderFactory(),
+      CreateBuiltinVideoEncoderFactory(),
+      CreateBuiltinVideoDecoderFactory(), nullptr /* audio_mixer */,
+      nullptr /* audio_processing */);
   
+  if (!m_peerConnectionFactory) {
+    std::cout << "Failed to initialize PeerConnectionFactory" << std::endl;
+  }
 }
 
 RTCSdpType ConvertSdpType(webrtc::SdpType type) {
@@ -40,7 +62,6 @@ PeerConnectionObject* Context::CreatePeerConnection(
   PeerConnectionDependencies dependencies(obj.get());
   // auto connection = m_peerConnectionFactory->CreatePeerConnectionOrError(
   //     config, std::move(dependencies));
-
 
   // if (!connection.ok()) {
   //   std::cout << "error!" << std::endl;
