@@ -35,4 +35,8 @@ void WebRTCPlugin::PeerConnectionCreateOffer(PeerConnectionObject* obj,
   obj->CreateOffer(*options);
 }
 
+void WebRTCPlugin::AddTracks(Context* context){
+  context->AddTracks();
+}
+
 }  // namespace webrtc

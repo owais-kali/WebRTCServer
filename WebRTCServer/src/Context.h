@@ -7,15 +7,17 @@ enum class RTCSdpType;
 
 class Context {
  public:
+  Context();
 
-Context();
-
-// PeerConnection
+  // PeerConnection
   PeerConnectionObject* CreatePeerConnection(
       const webrtc::PeerConnectionInterface::RTCConfiguration& config);
-      void AddObserver(const webrtc::PeerConnectionInterface* connection, const rtc::scoped_refptr<SetSessionDescriptionObserver>& observer);
+  void AddObserver(
+      const webrtc::PeerConnectionInterface* connection,
+      const rtc::scoped_refptr<SetSessionDescriptionObserver>& observer);
 
-    void AddTracks();
+  void AddTracks();
+
  private:
   std::unique_ptr<rtc::Thread> m_workerThread;
   std::unique_ptr<rtc::Thread> m_signalingThread;
@@ -47,4 +49,6 @@ Context();
   static uint32_t GenerateRendererId();
 };
 extern RTCSdpType ConvertSdpType(webrtc::SdpType type);
+
+
 }  // namespace webrtc

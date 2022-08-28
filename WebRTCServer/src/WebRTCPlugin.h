@@ -26,6 +26,7 @@ class WebRTCPlugin {
       const PeerConnectionInterface::RTCConfiguration& config);
 
   PeerConnectionObject* ContextCreatePeerConnection(Context* context);
+  void AddTracks(Context* context);
   void PeerConnectionCreateOffer(PeerConnectionObject* obj,
                                  const RTCOfferAnswerOptions* options);
 
