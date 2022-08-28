@@ -1,12 +1,13 @@
+#pragma clang diagnostic ignored "-Wunused-variable"
 #include <iostream>
 
 #include "WebRTCPlugin.h"
 #include "Context.h"
+#include "PeerConnectionObject.h"
 
 using namespace webrtc;
 int main() {
   WebRTCPlugin plugin;
-  plugin.Print();
     Context ctx;
-  plugin.ContextCreatePeerConnection(&ctx);
+  PeerConnectionObject* pco = plugin.ContextCreatePeerConnection(&ctx);
 }

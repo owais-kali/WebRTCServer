@@ -88,5 +88,8 @@ namespace webrtc
         DelegateOnTrack onTrack = nullptr;
         DelegateOnRemoveTrack onRemoveTrack = nullptr;
         rtc::scoped_refptr<webrtc::PeerConnectionInterface> connection = nullptr;
+
+        public:
+        void CreateOffer(const RTCOfferAnswerOptions & options);
     };
 }

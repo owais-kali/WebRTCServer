@@ -13,6 +13,12 @@ enum class RTCSdpType;
 
 enum class RTCSdpType { Offer, PrAnswer, Answer, Rollback };
 
+    struct RTCOfferAnswerOptions
+    {
+        bool iceRestart;
+        bool voiceActivityDetection;
+    };
+
 class WebRTCPlugin {
  public:
   PeerConnectionObject* _ContextCreatePeerConnection(

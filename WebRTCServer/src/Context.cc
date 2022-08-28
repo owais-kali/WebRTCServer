@@ -22,22 +22,23 @@ namespace webrtc
         }
     }
 
-    // PeerConnectionObject* Context::CreatePeerConnection(
-    //         const webrtc::PeerConnectionInterface::RTCConfiguration& config)
-    // {
-    //     rtc::scoped_refptr<PeerConnectionObject> obj =
-    //             new rtc::RefCountedObject<PeerConnectionObject>(*this);
-    //     PeerConnectionDependencies dependencies(obj);
-    //     auto connection = m_peerConnectionFactory->CreatePeerConnectionOrError(
-    //             config, std::move(dependencies));
-    //     if (!connection.ok())
-    //     {
-    //         RTC_LOG(LS_ERROR) << connection.error().message();
-    //         return nullptr;
-    //     }
-    //     obj->connection = connection.MoveValue();
-    //     const PeerConnectionObject* ptr = obj.get();
-    //     m_mapClients[ptr] = std::move(obj);
-    //     return m_mapClients[ptr].get();
-    // }
+    PeerConnectionObject* Context::CreatePeerConnection(
+            const webrtc::PeerConnectionInterface::RTCConfiguration& config)
+    {
+        rtc::scoped_refptr<PeerConnectionObject> obj =
+                rtc::scoped_refptr<PeerConnectionObject>(new rtc::RefCountedObject<PeerConnectionObject>());
+                
+        PeerConnectionDependencies dependencies(obj.get());
+        auto connection = m_peerConnectionFactory->CreatePeerConnectionOrError(
+                config, std::move(dependencies));
+        if (!connection.ok())
+        {
+            RTC_LOG(LS_ERROR) << connection.error().message();
+            return nullptr;
+        }
+        obj->connection = connection.MoveValue();
+        const PeerConnectionObject* ptr = obj.get();
+        m_mapClients[ptr] = std::move(obj);
+        return m_mapClients[ptr].get();
+    }
 }

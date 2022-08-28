@@ -1,5 +1,5 @@
 #include "PeerConnectionObject.h"
-
+#include <iostream>
 namespace webrtc
 {
     PeerConnectionObject::PeerConnectionObject(){
@@ -7,8 +7,9 @@ namespace webrtc
     }
     void PeerConnectionObject::OnSuccess(webrtc::SessionDescriptionInterface* desc)
     {
-//        std::string out;
-//        desc->ToString(&out);
+       std::string out;
+       desc->ToString(&out);
+       std::cout << "OnSuccess: "<< out << std::endl;
 //        const auto type = ConvertSdpType(desc->GetType());
 //        if (onCreateSDSuccess != nullptr)
 //        {
@@ -119,5 +120,13 @@ namespace webrtc
     void PeerConnectionObject::OnRemoveStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream)
     {
 //        DebugLog("OnRemoveStream");
+    }
+
+    void PeerConnectionObject::CreateOffer(const RTCOfferAnswerOptions & options)
+    {
+        webrtc::PeerConnectionInterface::RTCOfferAnswerOptions _options;
+        _options.ice_restart = options.iceRestart;
+        _options.voice_activity_detection = options.voiceActivityDetection;
+        connection->CreateOffer(this, _options);
     }
 }
