@@ -1,7 +1,7 @@
 
 #include "Context.h"
 
-namespace server {
+namespace webrtc {
 
 using namespace webrtc;
 

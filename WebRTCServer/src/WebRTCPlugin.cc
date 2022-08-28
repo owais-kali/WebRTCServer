@@ -6,7 +6,7 @@
 #include "Context.h"
 #include "SetSessionDescriptionObserver.h"
 
-namespace server {
+namespace webrtc {
 PeerConnectionObject* WebRTCPlugin::_ContextCreatePeerConnection(
     Context* context,
     const PeerConnectionInterface::RTCConfiguration& config) {

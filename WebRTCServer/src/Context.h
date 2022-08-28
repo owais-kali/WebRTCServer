@@ -1,7 +1,7 @@
 #pragma once
 #include "PeerConnectionObject.h"
 
-namespace server {
+namespace webrtc {
 
 enum class RTCSdpType;
 
