@@ -3,6 +3,7 @@
 //
 #pragma clang diagnostic ignored "-Wunused-variable"
 #include "WebRTCPlugin.h"
+
 #include "Context.h"
 #include "SSDO.h"
 
@@ -10,13 +11,12 @@ namespace webrtc {
 PeerConnectionObject* WebRTCPlugin::_ContextCreatePeerConnection(
     Context* context,
     const PeerConnectionInterface::RTCConfiguration& config) {
-    const auto obj = context->CreatePeerConnection(config);
+  const auto obj = context->CreatePeerConnection(config);
   if (obj == nullptr)
     return nullptr;
-  const auto observer =
-      SSDO::Create(obj);
+  const auto observer = SSDO::Create(obj);
   context->AddObserver(obj->connection.get(), observer);
-  return obj;
+  return nullptr;
 }
 
 PeerConnectionObject* WebRTCPlugin::ContextCreatePeerConnection(
@@ -26,4 +26,10 @@ PeerConnectionObject* WebRTCPlugin::ContextCreatePeerConnection(
   config.enable_implicit_rollback = true;
   return _ContextCreatePeerConnection(context, config);
 }
+
+void WebRTCPlugin::PeerConnectionCreateOffer(PeerConnectionObject* obj,
+                               const RTCOfferAnswerOptions* options) {
+  obj->CreateOffer(*options);
+}
+
 }  // namespace webrtc

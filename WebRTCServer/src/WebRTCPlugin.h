@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+
 #include "pch.h"
 namespace webrtc {
 
@@ -13,11 +14,10 @@ enum class RTCSdpType;
 
 enum class RTCSdpType { Offer, PrAnswer, Answer, Rollback };
 
-    struct RTCOfferAnswerOptions
-    {
-        bool iceRestart;
-        bool voiceActivityDetection;
-    };
+struct RTCOfferAnswerOptions {
+  bool iceRestart;
+  bool voiceActivityDetection;
+};
 
 class WebRTCPlugin {
  public:
@@ -26,7 +26,11 @@ class WebRTCPlugin {
       const PeerConnectionInterface::RTCConfiguration& config);
 
   PeerConnectionObject* ContextCreatePeerConnection(Context* context);
+  void PeerConnectionCreateOffer(PeerConnectionObject* obj,
+                                 const RTCOfferAnswerOptions* options);
 
-  void Print(){std::cout << "hello " << std::endl;}
+      void Print() {
+    std::cout << "hello " << std::endl;
+  }
 };
 }  // namespace webrtc

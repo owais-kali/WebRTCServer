@@ -41,8 +41,9 @@ PeerConnectionObject* Context::CreatePeerConnection(
     return nullptr;
   }
   obj->connection = connection.MoveValue();
-  const PeerConnectionObject* ptr = obj.get();
-  m_mapClients[ptr] = std::move(obj);
-  return m_mapClients[ptr].get();
+  // const PeerConnectionObject* ptr = obj.get();
+  // m_mapClients[ptr] = std::move(obj);
+  // return m_mapClients[ptr].get();
+  return nullptr;
 }
 }  // namespace webrtc
