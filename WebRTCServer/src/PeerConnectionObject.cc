@@ -1,4 +1,5 @@
 #include "PeerConnectionObject.h"
+#include "CapturerTrackSource.h"
 
 #include <iostream>
 namespace webrtc {
@@ -147,9 +148,9 @@ void PeerConnectionObject::AddTracks(
     rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track_(
         peer_connection_factory_->CreateVideoTrack(kVideoLabel,
                                                    video_device.get()));
-    main_wnd_->StartLocalRenderer(video_track_.get());
+    
 
-    result_or_error = peer_connection_->AddTrack(video_track_, {kStreamId});
+    result_or_error = connection->AddTrack(video_track_, {kStreamId});
     if (!result_or_error.ok()) {
       RTC_LOG(LS_ERROR) << "Failed to add video track to PeerConnection: "
                         << result_or_error.error().message();

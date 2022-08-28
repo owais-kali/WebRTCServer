@@ -811,6 +811,8 @@ if (is_linux || is_chromeos || is_win) {
         "WebRTCServer/src/Context.h",
         "WebRTCServer/src/SSDO.cc",
         "WebRTCServer/src/SSDO.h",
+        "WebRTCServer/src/CapturerTrackSource.cc",
+        "WebRTCServer/src/CapturerTrackSource.h",
         "WebRTCServer/src/main.cc",
       ]
       cflags = [ "-Wno-deprecated-declarations" ]
