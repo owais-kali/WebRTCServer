@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include "pch.h"
-namespace webrtc {
+namespace server {
 
 namespace webrtc = ::webrtc;
 

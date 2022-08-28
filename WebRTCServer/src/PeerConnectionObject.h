@@ -1,7 +1,7 @@
 #pragma once
 #include "WebRTCPlugin.h"
 
-namespace webrtc
+namespace server
 {
     using namespace webrtc;
 

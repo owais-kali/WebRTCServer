@@ -1,20 +1,22 @@
 //
 // Created by owais on 25/8/22.
 //
-
+#pragma clang diagnostic ignored "-Wunused-variable"
 #include "WebRTCPlugin.h"
+#include "Context.h"
+#include "SetSessionDescriptionObserver.h"
 
-namespace webrtc {
+namespace server {
 PeerConnectionObject* WebRTCPlugin::_ContextCreatePeerConnection(
     Context* context,
     const PeerConnectionInterface::RTCConfiguration& config) {
-//   const auto obj = context->CreatePeerConnection(config);
-//   if (obj == nullptr)
-//     return nullptr;
-//   const auto observer =
-//       unity::webrtc::SetSessionDescriptionObserver::Create(obj);
-//   context->AddObserver(obj->connection, observer);
-//   return obj;
+    const auto obj = context->CreatePeerConnection(config);
+  if (obj == nullptr)
+    return nullptr;
+  const auto observer =
+      server::SetSessionDescriptionObserver::Create(obj);
+  context->AddObserver(obj->connection.get(), observer);
+  return obj;
 return nullptr;
 }
 
