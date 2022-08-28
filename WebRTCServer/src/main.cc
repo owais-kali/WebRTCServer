@@ -16,7 +16,7 @@ int main() {
   plugin.AddTracks(&ctx);
   
   const RTCOfferAnswerOptions options{false, true};
-  plugin.PeerConnectionCreateOffer(pco, &options);
+  // plugin.PeerConnectionCreateOffer(pco, &options);
 
 
   std::cout << "Press Enter to Continue!" << std::endl;
