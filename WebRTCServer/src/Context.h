@@ -8,6 +8,8 @@ enum class RTCSdpType;
 class Context {
  public:
 
+Context();
+
 // PeerConnection
   PeerConnectionObject* CreatePeerConnection(
       const webrtc::PeerConnectionInterface::RTCConfiguration& config);

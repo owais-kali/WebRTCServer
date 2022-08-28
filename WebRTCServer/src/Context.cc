@@ -1,9 +1,13 @@
-
+#pragma clang diagnostic ignored "-Wunreachable-code"
 #include "Context.h"
 
 namespace webrtc {
 
 using namespace webrtc;
+
+Context::Context(){
+  
+}
 
 RTCSdpType ConvertSdpType(webrtc::SdpType type) {
   switch (type) {
@@ -34,13 +38,16 @@ PeerConnectionObject* Context::CreatePeerConnection(
           new rtc::RefCountedObject<PeerConnectionObject>());
 
   PeerConnectionDependencies dependencies(obj.get());
-  auto connection = m_peerConnectionFactory->CreatePeerConnectionOrError(
-      config, std::move(dependencies));
-  if (!connection.ok()) {
-    RTC_LOG(LS_ERROR) << connection.error().message();
-    return nullptr;
-  }
-  obj->connection = connection.MoveValue();
+  // auto connection = m_peerConnectionFactory->CreatePeerConnectionOrError(
+  //     config, std::move(dependencies));
+
+
+  // if (!connection.ok()) {
+  //   std::cout << "error!" << std::endl;
+  //   RTC_LOG(LS_ERROR) << connection.error().message();
+  //   return nullptr;
+  // }
+  // obj->connection = connection.MoveValue();
   // const PeerConnectionObject* ptr = obj.get();
   // m_mapClients[ptr] = std::move(obj);
   // return m_mapClients[ptr].get();

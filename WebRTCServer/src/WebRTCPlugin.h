@@ -29,8 +29,20 @@ class WebRTCPlugin {
   void PeerConnectionCreateOffer(PeerConnectionObject* obj,
                                  const RTCOfferAnswerOptions* options);
 
-      void Print() {
-    std::cout << "hello " << std::endl;
-  }
+std::string GetEnvVarOrDefault(const char* env_var_name,
+                               const char* default_value) {
+  std::string value;
+  const char* env_var = getenv(env_var_name);
+  if (env_var)
+    value = env_var;
+
+  if (value.empty())
+    value = default_value;
+
+  return value;
+}
+  std::string GetPeerConnectionString() {
+  return GetEnvVarOrDefault("WEBRTC_CONNECT", "stun:stun.l.google.com:19302");
+}
 };
 }  // namespace webrtc
