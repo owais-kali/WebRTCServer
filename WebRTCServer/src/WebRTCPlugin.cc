@@ -21,15 +21,22 @@ PeerConnectionObject* WebRTCPlugin::_ContextCreatePeerConnection(
 
 PeerConnectionObject* WebRTCPlugin::ContextCreatePeerConnection(
     Context* context) {
-  PeerConnectionInterface::RTCConfiguration config;
+  PeerConnectionInterface::RTCConfiguration config = {};
   config.sdp_semantics = SdpSemantics::kUnifiedPlan;
-  config.enable_implicit_rollback = true;
+  // config.enable_implicit_rollback = true;
+  webrtc::PeerConnectionInterface::IceServer server;
+  server.uri = GetPeerConnectionString();
+  config.servers.push_back(server);
   return _ContextCreatePeerConnection(context, config);
 }
 
 void WebRTCPlugin::PeerConnectionCreateOffer(PeerConnectionObject* obj,
                                const RTCOfferAnswerOptions* options) {
   obj->CreateOffer(*options);
+}
+
+void WebRTCPlugin::AddTracks(Context* context){
+  context->AddTracks();
 }
 
 }  // namespace webrtc

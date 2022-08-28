@@ -15,6 +15,7 @@
 #include "api/video/video_sink_interface.h"
 #include "api/video/i420_buffer.h"
 #include "pc/video_track_source_proxy.h"
+#include "pc/video_track_source.h"
 
 #include "rtc_base/thread.h"
 #include "rtc_base/ref_counted_object.h"
@@ -29,6 +30,8 @@
 #include "rtc_base/third_party/sigslot/sigslot.h"
 #include "rtc_base/atomic_ops.h"
 #include "rtc_base/async_tcp_socket.h"
+
+#include "test/vcm_capturer.h"
 
 #ifdef _WIN32
 #include "rtc_base/win32.h"

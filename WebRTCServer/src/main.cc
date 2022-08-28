@@ -13,8 +13,9 @@ int main() {
   WebRTCPlugin plugin;
   Context ctx;
   PeerConnectionObject* pco = plugin.ContextCreatePeerConnection(&ctx);
-
-  // const RTCOfferAnswerOptions options{};
+  plugin.AddTracks(&ctx);
+  
+  const RTCOfferAnswerOptions options{false, true};
   // plugin.PeerConnectionCreateOffer(pco, &options);
 
 
