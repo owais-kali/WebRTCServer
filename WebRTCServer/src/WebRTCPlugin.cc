@@ -4,7 +4,7 @@
 #pragma clang diagnostic ignored "-Wunused-variable"
 #include "WebRTCPlugin.h"
 #include "Context.h"
-#include "SetSessionDescriptionObserver.h"
+#include "SSDO.h"
 
 namespace webrtc {
 PeerConnectionObject* WebRTCPlugin::_ContextCreatePeerConnection(
@@ -14,10 +14,9 @@ PeerConnectionObject* WebRTCPlugin::_ContextCreatePeerConnection(
   if (obj == nullptr)
     return nullptr;
   const auto observer =
-      server::SetSessionDescriptionObserver::Create(obj);
+      SSDO::Create(obj);
   context->AddObserver(obj->connection.get(), observer);
   return obj;
-return nullptr;
 }
 
 PeerConnectionObject* WebRTCPlugin::ContextCreatePeerConnection(

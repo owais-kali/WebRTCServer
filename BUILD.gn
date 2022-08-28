@@ -809,8 +809,8 @@ if (is_linux || is_chromeos || is_win) {
         "WebRTCServer/src/PeerConnectionObject.h",
         "WebRTCServer/src/Context.cc",
         "WebRTCServer/src/Context.h",
-        "WebRTCServer/src/SetSessionDescriptionObserver.cc",
-        "WebRTCServer/src/SetSessionDescriptionObserver.h",
+        "WebRTCServer/src/SSDO.cc",
+        "WebRTCServer/src/SSDO.h",
         "WebRTCServer/src/main.cc",
       ]
       cflags = [ "-Wno-deprecated-declarations" ]
