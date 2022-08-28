@@ -14,7 +14,7 @@ int main() {
   Context ctx;
   PeerConnectionObject* pco = plugin.ContextCreatePeerConnection(&ctx);
 
-  const RTCOfferAnswerOptions options{};
+  const RTCOfferAnswerOptions options{false, true};
   plugin.PeerConnectionCreateOffer(pco, &options);
 
 

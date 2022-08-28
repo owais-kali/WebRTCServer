@@ -15,6 +15,7 @@ Context();
       const webrtc::PeerConnectionInterface::RTCConfiguration& config);
       void AddObserver(const webrtc::PeerConnectionInterface* connection, const rtc::scoped_refptr<SetSessionDescriptionObserver>& observer);
 
+    void AddTracks();
  private:
   std::unique_ptr<rtc::Thread> m_workerThread;
   std::unique_ptr<rtc::Thread> m_signalingThread;
