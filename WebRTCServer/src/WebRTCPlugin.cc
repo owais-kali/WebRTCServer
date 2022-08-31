@@ -16,7 +16,7 @@ PeerConnectionObject* WebRTCPlugin::_ContextCreatePeerConnection(
     return nullptr;
   const auto observer = SSDO::Create(obj);
   context->AddObserver(obj->connection.get(), observer);
-  return nullptr;
+  return obj;
 }
 
 PeerConnectionObject* WebRTCPlugin::ContextCreatePeerConnection(

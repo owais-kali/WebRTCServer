@@ -18,7 +18,7 @@ Context::Context()
   m_workerThread->Start();
   m_signalingThread->Start();
 
-  // rtc::InitializeSSL();
+  rtc::InitializeSSL();
 
   m_peerConnectionFactory = webrtc::CreatePeerConnectionFactory(
       m_workerThread.get() /* network_thread */, m_workerThread.get() /* worker_thread */,
@@ -71,7 +71,7 @@ PeerConnectionObject* Context::CreatePeerConnection(
     RTC_LOG(LS_ERROR) << connection.error().message();
     return nullptr;
   }
-  obj->connection = connection.MoveValue();
+  obj->connection = std::move(connection.value());
   const PeerConnectionObject* ptr = obj.get();
   m_mapClients[ptr] = std::move(obj);
 
