@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+
 #include "pch.h"
 
 namespace webrtc {
@@ -10,11 +11,14 @@ class Context;
 class PeerConnectionObject;
 class PeerConnectionInterface;
 
-enum class RTCSdpType;
-
 enum class RTCSdpType { Offer, PrAnswer, Answer, Rollback };
 
-//Callback Delegates
+struct RTCSessionDescription {
+  RTCSdpType type;
+  const char* sdp;
+};
+
+// Callback Delegates
 using DelegateCreateSDSuccess = void (*)(PeerConnectionObject*,
                                          RTCSdpType,
                                          const char*);
@@ -68,6 +72,11 @@ class WebRTCPlugin {
 
   void PeerConnectionCreateOffer(PeerConnectionObject* obj,
                                  const RTCOfferAnswerOptions* options);
+
+  RTCErrorType PeerConnectionSetLocalDescription(
+        Context* context, PeerConnectionObject* obj, const RTCSessionDescription* desc, std::string& error);
+
+  char* ConvertString(const std::string str);
 
   std::string GetEnvVarOrDefault(const char* env_var_name,
                                  const char* default_value) {

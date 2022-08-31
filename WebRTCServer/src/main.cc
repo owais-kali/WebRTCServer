@@ -12,13 +12,19 @@
 
 using namespace webrtc;
 
-void OnSuccess(PeerConnectionObject* pco, RTCSdpType type, const char* sdp){
-  std::cout << "callback: \n" << sdp << std::endl;
+WebRTCPlugin plugin;
+Context ctx;
+
+void OnSuccess(PeerConnectionObject* pco, RTCSdpType type, const char* sdp) {
+  RTCSessionDescription desc = {};
+  desc.sdp = sdp;
+  desc.type = type;
+  std::string error;
+  plugin.PeerConnectionSetLocalDescription(&ctx, pco, &desc, error);
+  std::cout << "error: "<<error << std::endl;
 }
 
-    int main() {
-  WebRTCPlugin plugin;
-  Context ctx;
+int main() {
   PeerConnectionObject* pco = plugin.ContextCreatePeerConnection(&ctx);
 
   const RTCOfferAnswerOptions options{false, true};

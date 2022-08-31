@@ -1,21 +1,20 @@
-#include "Context.h"
 #include "PeerConnectionObject.h"
 #include <iostream>
-
 #include "CapturerTrackSource.h"
+#include "Context.h"
+
+
+
 namespace webrtc {
 PeerConnectionObject::PeerConnectionObject() {}
 void PeerConnectionObject::OnSuccess(
     webrtc::SessionDescriptionInterface* desc) {
   std::string out;
   desc->ToString(&out);
-  std::cout << "OnSuccess: \n" << out << std::endl;
   const auto type = ConvertSdpType(desc->GetType());
   if (onCreateSDSuccess != nullptr) {
     onCreateSDSuccess(this, type, out.c_str());
   }
-
-  
 }
 void PeerConnectionObject::OnFailure(webrtc::RTCError error) {
   //        //::TODO
@@ -125,6 +124,21 @@ void PeerConnectionObject::CreateOffer(const RTCOfferAnswerOptions& options) {
   _options.ice_restart = options.iceRestart;
   _options.voice_activity_detection = options.voiceActivityDetection;
   connection->CreateOffer(this, _options);
+}
+
+RTCErrorType PeerConnectionObject::SetLocalDescription(
+    const RTCSessionDescription& desc,
+    webrtc::SetSessionDescriptionObserver* observer,
+    std::string& error) {
+  SdpParseError error_;
+  std::unique_ptr<SessionDescriptionInterface> _desc =
+      CreateSessionDescription(ConvertSdpType(desc.type), desc.sdp, &error_);
+  if (!_desc.get()) {
+    error = error_.description;
+    return RTCErrorType::SYNTAX_ERROR;
+  }
+  connection->SetLocalDescription(observer, _desc.release());
+  return RTCErrorType::NONE;
 }
 
 void PeerConnectionObject::AddTracks(
