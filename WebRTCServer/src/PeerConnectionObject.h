@@ -112,13 +112,19 @@ class PeerConnectionObject : public webrtc::CreateSessionDescriptionObserver,
 
  public:
   void CreateOffer(const RTCOfferAnswerOptions& options);
+  void RegisterCallbackCreateSD(DelegateCreateSDSuccess onSuccess,
+                                DelegateCreateSDFailure onFailure) {
+    onCreateSDSuccess = onSuccess;
+    onCreateSDFailure = onFailure;
+  }
 
-  void AddTracks (webrtc::PeerConnectionFactoryInterface* peer_connection_factory_) const;
+  void AddTracks(
+      webrtc::PeerConnectionFactoryInterface* peer_connection_factory_) const;
 };
 
-  // conductor.cc constants
-  const char kAudioLabel[] = "audio_label";
-  const char kVideoLabel[] = "video_label";
-  const char kStreamId[] = "stream_id";
-  const uint16_t kDefaultServerPort = 8888;
+// conductor.cc constants
+const char kAudioLabel[] = "audio_label";
+const char kVideoLabel[] = "video_label";
+const char kStreamId[] = "stream_id";
+const uint16_t kDefaultServerPort = 8888;
 }  // namespace webrtc

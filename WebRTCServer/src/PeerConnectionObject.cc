@@ -1,7 +1,8 @@
+#include "Context.h"
 #include "PeerConnectionObject.h"
-#include "CapturerTrackSource.h"
-
 #include <iostream>
+
+#include "CapturerTrackSource.h"
 namespace webrtc {
 PeerConnectionObject::PeerConnectionObject() {}
 void PeerConnectionObject::OnSuccess(
@@ -9,11 +10,12 @@ void PeerConnectionObject::OnSuccess(
   std::string out;
   desc->ToString(&out);
   std::cout << "OnSuccess: \n" << out << std::endl;
-  //        const auto type = ConvertSdpType(desc->GetType());
-  //        if (onCreateSDSuccess != nullptr)
-  //        {
-  ////            onCreateSDSuccess(this, type, out.c_str());
-  //        }
+  const auto type = ConvertSdpType(desc->GetType());
+  if (onCreateSDSuccess != nullptr) {
+    onCreateSDSuccess(this, type, out.c_str());
+  }
+
+  
 }
 void PeerConnectionObject::OnFailure(webrtc::RTCError error) {
   //        //::TODO
@@ -126,8 +128,7 @@ void PeerConnectionObject::CreateOffer(const RTCOfferAnswerOptions& options) {
 }
 
 void PeerConnectionObject::AddTracks(
-    webrtc::PeerConnectionFactoryInterface*
-        peer_connection_factory_) const {
+    webrtc::PeerConnectionFactoryInterface* peer_connection_factory_) const {
   if (!connection->GetSenders().empty()) {
     return;  // Already added tracks.
   }
@@ -148,7 +149,6 @@ void PeerConnectionObject::AddTracks(
     rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track_(
         peer_connection_factory_->CreateVideoTrack(kVideoLabel,
                                                    video_device.get()));
-    
 
     result_or_error = connection->AddTrack(video_track_, {kStreamId});
     if (!result_or_error.ok()) {

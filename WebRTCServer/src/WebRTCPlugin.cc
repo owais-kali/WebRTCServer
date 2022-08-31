@@ -30,6 +30,13 @@ PeerConnectionObject* WebRTCPlugin::ContextCreatePeerConnection(
   return _ContextCreatePeerConnection(context, config);
 }
 
+void WebRTCPlugin::PeerConnectionRegisterCallbackCreateSD(
+      PeerConnectionObject* obj,
+      DelegateCreateSDSuccess onSuccess,
+      DelegateCreateSDFailure onFailure){
+        obj->RegisterCallbackCreateSD(onSuccess, onFailure);
+      }
+
 void WebRTCPlugin::PeerConnectionCreateOffer(PeerConnectionObject* obj,
                                const RTCOfferAnswerOptions* options) {
   obj->CreateOffer(*options);
