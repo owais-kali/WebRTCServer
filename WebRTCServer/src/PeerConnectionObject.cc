@@ -8,7 +8,7 @@ void PeerConnectionObject::OnSuccess(
     webrtc::SessionDescriptionInterface* desc) {
   std::string out;
   desc->ToString(&out);
-  std::cout << "OnSuccess: " << out << std::endl;
+  std::cout << "OnSuccess: \n" << out << std::endl;
   //        const auto type = ConvertSdpType(desc->GetType());
   //        if (onCreateSDSuccess != nullptr)
   //        {

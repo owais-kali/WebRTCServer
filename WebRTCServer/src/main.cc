@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <cstdio>
+#include <unistd.h>
 
 #include "WebRTCPlugin.h"
 #include "Context.h"
@@ -13,11 +14,11 @@ int main() {
   WebRTCPlugin plugin;
   Context ctx;
   PeerConnectionObject* pco = plugin.ContextCreatePeerConnection(&ctx);
-  plugin.AddTracks(&ctx);
-  
-  const RTCOfferAnswerOptions options{false, true};
-  // plugin.PeerConnectionCreateOffer(pco, &options);
+  // plugin.AddTracks(&ctx);
 
+  const RTCOfferAnswerOptions options{false, true};
+
+  plugin.PeerConnectionCreateOffer(pco, &options);
 
   std::cout << "Press Enter to Continue!" << std::endl;
   int age;
