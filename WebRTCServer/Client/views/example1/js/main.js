@@ -31,10 +31,10 @@ GetOfferBtn.onclick = async () => {
   GetOfferBtn.disabled = true;
   SetAnswerBtn.disabled = false;
 
-  output('createOffer -> onOfferSuccess');
-  output('Offer SDP:begin');
+  // output('createOffer -> onOfferSuccess');
+  // output('Offer SDP:begin');
   output(offer.sdp);
-  output('Offer SDP:end');
+  // output('Offer SDP:end');
 };
 
 SetAnswerBtn.onclick = async () => {
