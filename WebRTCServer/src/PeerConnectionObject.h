@@ -88,6 +88,14 @@ class PeerConnectionObject : public webrtc::CreateSessionDescriptionObserver,
     onCreateSDSuccess = onSuccess;
     onCreateSDFailure = onFailure;
   }
+
+  void RegisterLocalSdpReady(DelegateLocalSdpReady callback) {
+    onLocalSdpReady = callback;
+  }
+  void RegisterIceCandidate(DelegateIceCandidate callback) {
+    onIceCandidate = callback;
+  }
+
   RTCErrorType SetLocalDescription(
       const RTCSessionDescription& desc,
       webrtc::SetSessionDescriptionObserver* observer,

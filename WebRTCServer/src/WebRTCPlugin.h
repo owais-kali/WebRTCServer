@@ -70,6 +70,10 @@ class WebRTCPlugin {
       DelegateCreateSDSuccess onSuccess,
       DelegateCreateSDFailure onFailure);
 
+  void PeerConnectionRegisterOnIceCandidate(
+    PeerConnectionObject* obj,
+    DelegateIceCandidate callback);
+
   void PeerConnectionCreateOffer(PeerConnectionObject* obj,
                                  const RTCOfferAnswerOptions* options);
 

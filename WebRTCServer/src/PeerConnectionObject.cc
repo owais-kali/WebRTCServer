@@ -1,9 +1,9 @@
 #include "PeerConnectionObject.h"
+
 #include <iostream>
+
 #include "CapturerTrackSource.h"
 #include "Context.h"
-
-
 
 namespace webrtc {
 PeerConnectionObject::PeerConnectionObject() {}
@@ -35,20 +35,16 @@ void PeerConnectionObject::OnDataChannel(
 
 void PeerConnectionObject::OnIceCandidate(
     const webrtc::IceCandidateInterface* candidate) {
-         std::string out;
-          candidate->ToString(&out);
+  std::string out;
+  candidate->ToString(&out);
 
-        // std::cout << "OnIceCandidate: \n"<<out << " \n OnIceCandidate End\n" << std::endl;
-
-         //if (!candidate->ToString(&out))
-  //        {
-  ////            DebugError("Can't make string form of sdp.");
-  //        }
-  //        if (onIceCandidate != nullptr)
-  //        {
-  //            onIceCandidate(this, out.c_str(), candidate->sdp_mid().c_str(),
-  //            candidate->sdp_mline_index());
-  //        }
+  if (!candidate->ToString(&out)) {
+    //            DebugError("Can't make string form of sdp.");
+  }
+  if (onIceCandidate != nullptr) {
+    onIceCandidate(this, out.c_str(), candidate->sdp_mid().c_str(),
+                   candidate->sdp_mline_index());
+  }
 }
 
 void PeerConnectionObject::OnRenegotiationNeeded() {

@@ -37,6 +37,12 @@ void WebRTCPlugin::PeerConnectionRegisterCallbackCreateSD(
   obj->RegisterCallbackCreateSD(onSuccess, onFailure);
 }
 
+void WebRTCPlugin::PeerConnectionRegisterOnIceCandidate(
+    PeerConnectionObject* obj,
+    DelegateIceCandidate callback) {
+  obj->RegisterIceCandidate(callback);
+}
+
 void WebRTCPlugin::PeerConnectionCreateOffer(
     PeerConnectionObject* obj,
     const RTCOfferAnswerOptions* options) {
@@ -48,7 +54,6 @@ RTCErrorType WebRTCPlugin::PeerConnectionSetLocalDescription(
     PeerConnectionObject* obj,
     const RTCSessionDescription* desc,
     std::string& error) {
-  
   RTCErrorType errorType = obj->SetLocalDescription(
       *desc, context->GetObserver(obj->connection.get()), error);
 

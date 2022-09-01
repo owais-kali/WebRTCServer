@@ -1,8 +1,6 @@
 #pragma clang diagnostic ignored "-Wunused-variable"
 #pragma clang diagnostic ignored "-Wunused-result"
 
-
-
 #include <unistd.h>
 
 #include <cstdio>
@@ -40,12 +38,20 @@ void OnSuccess(PeerConnectionObject* pco, RTCSdpType type, const char* sdp) {
   }
 }
 
+void OnIceCandidate(PeerConnectionObject* pco,
+                    const char* candidate,
+                    const char* sdpMid,
+                    const int sdpMlineIndex) {
+                      LogPrint("OnIceCandidate\n");
+                    }
+
 int main() {
   PeerConnectionObject* pco = plugin.ContextCreatePeerConnection(&ctx);
 
   const RTCOfferAnswerOptions options{false, true};
 
   plugin.PeerConnectionRegisterCallbackCreateSD(pco, OnSuccess, nullptr);
+  plugin.PeerConnectionRegisterOnIceCandidate(pco, OnIceCandidate);
 
   plugin.AddTracks(&ctx);
 
