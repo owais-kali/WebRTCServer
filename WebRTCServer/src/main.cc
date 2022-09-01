@@ -1,5 +1,6 @@
 #pragma clang diagnostic ignored "-Wunused-variable"
 #pragma clang diagnostic ignored "-Wunused-result"
+#pragma clang diagnostic ignored "-Wunreachable-code"
 
 #include <unistd.h>
 
@@ -33,7 +34,7 @@ void OnSuccess(PeerConnectionObject* pco, RTCSdpType type, const char* sdp) {
     } break;
 
     case RTCSdpType::Answer: {
-      LogPrint("Answer SDP: \n %s", sdp);
+      LogPrint("Answer SDP: \n%s", sdp);
     } break;
     default:
       // TODO:
@@ -81,17 +82,22 @@ int main() {
 
   // plugin.PeerConnectionCreateOffer(pco, &options);
 
+
   std::cout << "Enter Remote Offer \n" << std::endl;
   auto RemoteOffer = GetInput();
 
-  RTCSessionDescription AnswerSD = {};
-  AnswerSD.type = RTCSdpType::Answer;
-  AnswerSD.sdp = RemoteOffer.c_str();
+  RTCSessionDescription OfferSD = {};
+  OfferSD.type = RTCSdpType::Offer;
+  OfferSD.sdp = RemoteOffer.c_str();
 
-  char* error[100];
-  auto errotTyp = plugin.PeerConnectionSetRemoteDescription(&ctx, pco, &AnswerSD, error);
-
+  char* error[1000];
+  auto errotTyp = plugin.PeerConnectionSetRemoteDescription(&ctx, pco, &OfferSD, error);
+  
+  LogPrint("Create Answer");
   plugin.PeerConnectionCreateAnswer(pco, &options);
+  
+  sleep(1000);
+  
 
   return 0;
 }

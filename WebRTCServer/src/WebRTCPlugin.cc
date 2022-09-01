@@ -78,6 +78,11 @@ RTCErrorType WebRTCPlugin::PeerConnectionSetRemoteDescription(
   return errorType;
 }
 
+PeerConnectionInterface::SignalingState
+WebRTCPlugin::PeerConnectionSignalingState(PeerConnectionObject* obj) {
+  return obj->connection->signaling_state();
+}
+
 char* WebRTCPlugin::ConvertString(const std::string str) {
   const size_t size = str.size();
   char* ret = static_cast<char*>(CoTaskMemAlloc(size + sizeof(char)));

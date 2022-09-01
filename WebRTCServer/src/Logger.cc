@@ -14,14 +14,14 @@ namespace webrtc
 #if _DEBUG
         va_list vl;
         va_start(vl, fmt);
-        char buf[2048];
+        char buf[20480];
 #if _WIN32
         vsprintf_s(buf, fmt, vl);
 #else
         vsprintf(buf, fmt, vl);
 #endif
         va_end(vl);
-        printf("Logger: %s", buf);
+        printf("Logger: %s\n", buf);
 #endif
     }
     void checkf(bool result, const char* msg)

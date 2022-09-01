@@ -90,6 +90,9 @@ class WebRTCPlugin {
       const RTCSessionDescription* desc,
       char* error[]);
 
+  PeerConnectionInterface::SignalingState PeerConnectionSignalingState(
+      PeerConnectionObject* obj);
+
   char* ConvertString(const std::string str);
 
   std::string GetEnvVarOrDefault(const char* env_var_name,
