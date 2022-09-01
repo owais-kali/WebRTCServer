@@ -15,6 +15,8 @@ class Context {
   void AddObserver(
       const webrtc::PeerConnectionInterface* connection,
       const rtc::scoped_refptr<SetSessionDescriptionObserver>& observer);
+  SetSessionDescriptionObserver* GetObserver(
+      webrtc::PeerConnectionInterface* connection);
 
   void AddTracks();
 
@@ -48,7 +50,8 @@ class Context {
   static uint32_t s_rendererId;
   static uint32_t GenerateRendererId();
 };
-extern RTCSdpType ConvertSdpType(webrtc::SdpType type);
 
+webrtc::SdpType ConvertSdpType(RTCSdpType type);
+RTCSdpType ConvertSdpType(webrtc::SdpType type);
 
 }  // namespace webrtc

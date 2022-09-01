@@ -10,7 +10,12 @@ now clone this repo inside src/examples folder
 and replace src/examples/BUILD.gn with BUILD.gn in this repo.
 
 To Generate ninja files run in src/:
-```gn gen out/Default``` 
+
+For Release Build:
+```gn gen out/Default --args='is_debug=false'``` 
+
+For Debug Build:
+```gn gen out/Default --args='is_debug=true'``` 
 
 To compile run:
 ```ninja -C out/Default```

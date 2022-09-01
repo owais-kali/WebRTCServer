@@ -1,3 +1,4 @@
+
 #pragma once
 #include "WebRTCPlugin.h"
 
@@ -6,36 +7,6 @@ using namespace webrtc;
 
 class PeerConnectionObject;
 enum class RTCSdpType;
-
-using DelegateCreateSDSuccess = void (*)(PeerConnectionObject*,
-                                         RTCSdpType,
-                                         const char*);
-using DelegateCreateSDFailure = void (*)(PeerConnectionObject*,
-                                         webrtc::RTCErrorType,
-                                         const char*);
-using DelegateLocalSdpReady = void (*)(PeerConnectionObject*,
-                                       const char*,
-                                       const char*);
-using DelegateIceCandidate = void (*)(PeerConnectionObject*,
-                                      const char*,
-                                      const char*,
-                                      const int);
-using DelegateOnIceConnectionChange =
-    void (*)(PeerConnectionObject*,
-             webrtc::PeerConnectionInterface::IceConnectionState);
-using DelegateOnIceGatheringChange =
-    void (*)(PeerConnectionObject*,
-             webrtc::PeerConnectionInterface::IceGatheringState);
-using DelegateOnConnectionStateChange =
-    void (*)(PeerConnectionObject*,
-             webrtc::PeerConnectionInterface::PeerConnectionState);
-using DelegateOnDataChannel = void (*)(PeerConnectionObject*,
-                                       DataChannelInterface*);
-using DelegateOnRenegotiationNeeded = void (*)(PeerConnectionObject*);
-using DelegateOnTrack = void (*)(PeerConnectionObject*,
-                                 webrtc::RtpTransceiverInterface*);
-using DelegateOnRemoveTrack = void (*)(PeerConnectionObject*,
-                                       webrtc::RtpReceiverInterface*);
 
 class PeerConnectionObject : public webrtc::CreateSessionDescriptionObserver,
                              public webrtc::PeerConnectionObserver {
@@ -112,13 +83,31 @@ class PeerConnectionObject : public webrtc::CreateSessionDescriptionObserver,
 
  public:
   void CreateOffer(const RTCOfferAnswerOptions& options);
+  void RegisterCallbackCreateSD(DelegateCreateSDSuccess onSuccess,
+                                DelegateCreateSDFailure onFailure) {
+    onCreateSDSuccess = onSuccess;
+    onCreateSDFailure = onFailure;
+  }
 
-  void AddTracks (webrtc::PeerConnectionFactoryInterface* peer_connection_factory_) const;
+  void RegisterLocalSdpReady(DelegateLocalSdpReady callback) {
+    onLocalSdpReady = callback;
+  }
+  void RegisterIceCandidate(DelegateIceCandidate callback) {
+    onIceCandidate = callback;
+  }
+
+  RTCErrorType SetLocalDescription(
+      const RTCSessionDescription& desc,
+      webrtc::SetSessionDescriptionObserver* observer,
+      std::string& error);
+
+  void AddTracks(
+      webrtc::PeerConnectionFactoryInterface* peer_connection_factory_) const;
 };
 
-  // conductor.cc constants
-  const char kAudioLabel[] = "audio_label";
-  const char kVideoLabel[] = "video_label";
-  const char kStreamId[] = "stream_id";
-  const uint16_t kDefaultServerPort = 8888;
+// conductor.cc constants
+const char kAudioLabel[] = "audio_label";
+const char kVideoLabel[] = "video_label";
+const char kStreamId[] = "stream_id";
+const uint16_t kDefaultServerPort = 8888;
 }  // namespace webrtc

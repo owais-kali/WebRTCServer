@@ -1,26 +1,65 @@
-#pragma clang diagnostic ignored "-Wunused-variable" 
+#pragma clang diagnostic ignored "-Wunused-variable"
 #pragma clang diagnostic ignored "-Wunused-result"
 
-#include <iostream>
-#include <cstdio>
 #include <unistd.h>
 
-#include "WebRTCPlugin.h"
+#include <cstdio>
+#include <iostream>
+
 #include "Context.h"
 #include "PeerConnectionObject.h"
+#include "WebRTCPlugin.h"
 
 using namespace webrtc;
+
+WebRTCPlugin plugin;
+Context ctx;
+
+void OnSuccess(PeerConnectionObject* pco, RTCSdpType type, const char* sdp) {
+  switch (type) {
+    case RTCSdpType::Offer: {
+      RTCSessionDescription desc = {};
+      desc.sdp = sdp;
+      desc.type = type;
+      std::string error;
+      auto errorType =
+          plugin.PeerConnectionSetLocalDescription(&ctx, pco, &desc, error);
+
+      if (errorType != webrtc::RTCErrorType::NONE) {
+        std::cout << "error: " << error << std::endl;
+      }
+
+      std::cout << "Offer: \n" << sdp << std::endl;
+    } break;
+
+    default:
+      // TODO:
+      break;
+  }
+}
+
+void OnIceCandidate(PeerConnectionObject* pco,
+                    const char* candidate,
+                    const char* sdpMid,
+                    const int sdpMlineIndex) {
+                      LogPrint("OnIceCandidate\n");
+                    }
+
 int main() {
-  WebRTCPlugin plugin;
-  Context ctx;
   PeerConnectionObject* pco = plugin.ContextCreatePeerConnection(&ctx);
-  // plugin.AddTracks(&ctx);
 
   const RTCOfferAnswerOptions options{false, true};
 
+  plugin.PeerConnectionRegisterCallbackCreateSD(pco, OnSuccess, nullptr);
+  plugin.PeerConnectionRegisterOnIceCandidate(pco, OnIceCandidate);
+
+  plugin.AddTracks(&ctx);
+
   plugin.PeerConnectionCreateOffer(pco, &options);
 
-  std::cout << "Press Enter to Continue!" << std::endl;
-  int age;
-  scanf("%d", &age);
+  std::cout << "Enter Remote Offer \n" << std::endl;
+  char RemoteOffer[1024];
+  scanf("%s", RemoteOffer);
+
+  std::cout << "Remote Offer: \n"<< RemoteOffer << std::endl;
 }

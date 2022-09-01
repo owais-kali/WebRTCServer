@@ -30,12 +30,45 @@ PeerConnectionObject* WebRTCPlugin::ContextCreatePeerConnection(
   return _ContextCreatePeerConnection(context, config);
 }
 
-void WebRTCPlugin::PeerConnectionCreateOffer(PeerConnectionObject* obj,
-                               const RTCOfferAnswerOptions* options) {
+void WebRTCPlugin::PeerConnectionRegisterCallbackCreateSD(
+    PeerConnectionObject* obj,
+    DelegateCreateSDSuccess onSuccess,
+    DelegateCreateSDFailure onFailure) {
+  obj->RegisterCallbackCreateSD(onSuccess, onFailure);
+}
+
+void WebRTCPlugin::PeerConnectionRegisterOnIceCandidate(
+    PeerConnectionObject* obj,
+    DelegateIceCandidate callback) {
+  obj->RegisterIceCandidate(callback);
+}
+
+void WebRTCPlugin::PeerConnectionCreateOffer(
+    PeerConnectionObject* obj,
+    const RTCOfferAnswerOptions* options) {
   obj->CreateOffer(*options);
 }
 
-void WebRTCPlugin::AddTracks(Context* context){
+RTCErrorType WebRTCPlugin::PeerConnectionSetLocalDescription(
+    Context* context,
+    PeerConnectionObject* obj,
+    const RTCSessionDescription* desc,
+    std::string& error) {
+  RTCErrorType errorType = obj->SetLocalDescription(
+      *desc, context->GetObserver(obj->connection.get()), error);
+
+  return errorType;
+}
+
+char* WebRTCPlugin::ConvertString(const std::string str) {
+  const size_t size = str.size();
+  char* ret = static_cast<char*>(CoTaskMemAlloc(size + sizeof(char)));
+  str.copy(ret, size);
+  ret[size] = '\0';
+  return ret;
+}
+
+void WebRTCPlugin::AddTracks(Context* context) {
   context->AddTracks();
 }
 

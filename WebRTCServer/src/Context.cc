@@ -1,11 +1,12 @@
 #pragma clang diagnostic ignored "-Wunreachable-code"
-#pragma clang diagnostic ignored "-Wunused-variable" 
+#pragma clang diagnostic ignored "-Wunused-variable"
+#include "Context.h"
+
 #include <iostream>
 
-#include "Context.h"
-#include "api/task_queue/default_task_queue_factory.h"
-#include "api/audio_codecs/builtin_audio_encoder_factory.h"
 #include "api/audio_codecs/builtin_audio_decoder_factory.h"
+#include "api/audio_codecs/builtin_audio_encoder_factory.h"
+#include "api/task_queue/default_task_queue_factory.h"
 
 namespace webrtc {
 
@@ -21,16 +22,28 @@ Context::Context()
   rtc::InitializeSSL();
 
   m_peerConnectionFactory = webrtc::CreatePeerConnectionFactory(
-      m_workerThread.get() /* network_thread */, m_workerThread.get() /* worker_thread */,
-      m_signalingThread.get(), nullptr /* default_adm */,
-      CreateBuiltinAudioEncoderFactory(),
-      CreateBuiltinAudioDecoderFactory(),
-      CreateBuiltinVideoEncoderFactory(),
+      m_workerThread.get() /* network_thread */,
+      m_workerThread.get() /* worker_thread */, m_signalingThread.get(),
+      nullptr /* default_adm */, CreateBuiltinAudioEncoderFactory(),
+      CreateBuiltinAudioDecoderFactory(), CreateBuiltinVideoEncoderFactory(),
       CreateBuiltinVideoDecoderFactory(), nullptr /* audio_mixer */,
       nullptr /* audio_processing */);
-  
+
   if (!m_peerConnectionFactory) {
     std::cout << "Failed to initialize PeerConnectionFactory" << std::endl;
+  }
+}
+
+webrtc::SdpType ConvertSdpType(RTCSdpType type) {
+  switch (type) {
+    case RTCSdpType::Offer:
+      return webrtc::SdpType::kOffer;
+    case RTCSdpType::PrAnswer:
+      return webrtc::SdpType::kPrAnswer;
+    case RTCSdpType::Answer:
+      return webrtc::SdpType::kAnswer;
+    case RTCSdpType::Rollback:
+      return webrtc::SdpType::kRollback;
   }
 }
 
@@ -56,6 +69,11 @@ void Context::AddObserver(
   m_mapSetSessionDescriptionObserver[connection] = observer;
 }
 
+SetSessionDescriptionObserver* Context::GetObserver(
+    webrtc::PeerConnectionInterface* connection) {
+      return m_mapSetSessionDescriptionObserver[connection].get();
+    }
+
 PeerConnectionObject* Context::CreatePeerConnection(
     const webrtc::PeerConnectionInterface::RTCConfiguration& config) {
   rtc::scoped_refptr<PeerConnectionObject> obj =
@@ -80,12 +98,10 @@ PeerConnectionObject* Context::CreatePeerConnection(
   return m_mapClients[ptr].get();
 }
 
-void Context::AddTracks(){
-  for (auto&& kv : m_mapClients)
-  {
-       kv.first->AddTracks(m_peerConnectionFactory.get());
+void Context::AddTracks() {
+  for (auto&& kv : m_mapClients) {
+    kv.first->AddTracks(m_peerConnectionFactory.get());
   }
-  
 }
 
 }  // namespace webrtc

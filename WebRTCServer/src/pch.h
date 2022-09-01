@@ -1,4 +1,6 @@
 #pragma once
+#pragma clang diagnostic ignored "-Wunused-variable" 
+
 #pragma region webRTC related
 #include "api/media_stream_interface.h"
 #include "api/peer_connection_interface.h"

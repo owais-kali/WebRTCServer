@@ -1,19 +1,20 @@
 #include "PeerConnectionObject.h"
-#include "CapturerTrackSource.h"
 
 #include <iostream>
+
+#include "CapturerTrackSource.h"
+#include "Context.h"
+
 namespace webrtc {
 PeerConnectionObject::PeerConnectionObject() {}
 void PeerConnectionObject::OnSuccess(
     webrtc::SessionDescriptionInterface* desc) {
   std::string out;
   desc->ToString(&out);
-  std::cout << "OnSuccess: \n" << out << std::endl;
-  //        const auto type = ConvertSdpType(desc->GetType());
-  //        if (onCreateSDSuccess != nullptr)
-  //        {
-  ////            onCreateSDSuccess(this, type, out.c_str());
-  //        }
+  const auto type = ConvertSdpType(desc->GetType());
+  if (onCreateSDSuccess != nullptr) {
+    onCreateSDSuccess(this, type, out.c_str());
+  }
 }
 void PeerConnectionObject::OnFailure(webrtc::RTCError error) {
   //        //::TODO
@@ -34,17 +35,16 @@ void PeerConnectionObject::OnDataChannel(
 
 void PeerConnectionObject::OnIceCandidate(
     const webrtc::IceCandidateInterface* candidate) {
-  //        std::string out;
-  //
-  //        if (!candidate->ToString(&out))
-  //        {
-  ////            DebugError("Can't make string form of sdp.");
-  //        }
-  //        if (onIceCandidate != nullptr)
-  //        {
-  //            onIceCandidate(this, out.c_str(), candidate->sdp_mid().c_str(),
-  //            candidate->sdp_mline_index());
-  //        }
+  std::string out;
+  candidate->ToString(&out);
+
+  if (!candidate->ToString(&out)) {
+    //            DebugError("Can't make string form of sdp.");
+  }
+  if (onIceCandidate != nullptr) {
+    onIceCandidate(this, out.c_str(), candidate->sdp_mid().c_str(),
+                   candidate->sdp_mline_index());
+  }
 }
 
 void PeerConnectionObject::OnRenegotiationNeeded() {
@@ -125,9 +125,23 @@ void PeerConnectionObject::CreateOffer(const RTCOfferAnswerOptions& options) {
   connection->CreateOffer(this, _options);
 }
 
+RTCErrorType PeerConnectionObject::SetLocalDescription(
+    const RTCSessionDescription& desc,
+    webrtc::SetSessionDescriptionObserver* observer,
+    std::string& error) {
+  SdpParseError error_;
+  std::unique_ptr<SessionDescriptionInterface> _desc =
+      CreateSessionDescription(ConvertSdpType(desc.type), desc.sdp, &error_);
+  if (!_desc.get()) {
+    error = error_.description;
+    return RTCErrorType::SYNTAX_ERROR;
+  }
+  connection->SetLocalDescription(observer, _desc.release());
+  return RTCErrorType::NONE;
+}
+
 void PeerConnectionObject::AddTracks(
-    webrtc::PeerConnectionFactoryInterface*
-        peer_connection_factory_) const {
+    webrtc::PeerConnectionFactoryInterface* peer_connection_factory_) const {
   if (!connection->GetSenders().empty()) {
     return;  // Already added tracks.
   }
@@ -148,7 +162,6 @@ void PeerConnectionObject::AddTracks(
     rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track_(
         peer_connection_factory_->CreateVideoTrack(kVideoLabel,
                                                    video_device.get()));
-    
 
     result_or_error = connection->AddTrack(video_track_, {kStreamId});
     if (!result_or_error.ok()) {
