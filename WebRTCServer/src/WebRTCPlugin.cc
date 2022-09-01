@@ -83,7 +83,7 @@ WebRTCPlugin::PeerConnectionSignalingState(PeerConnectionObject* obj) {
   return obj->connection->signaling_state();
 }
 
-char* WebRTCPlugin::ConvertString(const std::string str) {
+char* ConvertString(const std::string str) {
   const size_t size = str.size();
   char* ret = static_cast<char*>(CoTaskMemAlloc(size + sizeof(char)));
   str.copy(ret, size);
