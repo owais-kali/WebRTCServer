@@ -49,6 +49,12 @@ void WebRTCPlugin::PeerConnectionCreateOffer(
   obj->CreateOffer(*options);
 }
 
+void WebRTCPlugin::PeerConnectionCreateAnswer(
+    PeerConnectionObject* obj,
+    const RTCOfferAnswerOptions* options) {
+  obj->CreateAnswer(*options);
+}
+
 RTCErrorType WebRTCPlugin::PeerConnectionSetLocalDescription(
     Context* context,
     PeerConnectionObject* obj,
@@ -57,6 +63,18 @@ RTCErrorType WebRTCPlugin::PeerConnectionSetLocalDescription(
   RTCErrorType errorType = obj->SetLocalDescription(
       *desc, context->GetObserver(obj->connection.get()), error);
 
+  return errorType;
+}
+
+RTCErrorType WebRTCPlugin::PeerConnectionSetRemoteDescription(
+    Context* context,
+    PeerConnectionObject* obj,
+    const RTCSessionDescription* desc,
+    char* error[]) {
+  std::string error_;
+  RTCErrorType errorType = obj->SetRemoteDescription(
+      *desc, context->GetObserver(obj->connection.get()), error_);
+  *error = ConvertString(error_);
   return errorType;
 }
 

@@ -70,15 +70,25 @@ class WebRTCPlugin {
       DelegateCreateSDSuccess onSuccess,
       DelegateCreateSDFailure onFailure);
 
-  void PeerConnectionRegisterOnIceCandidate(
-    PeerConnectionObject* obj,
-    DelegateIceCandidate callback);
+  void PeerConnectionRegisterOnIceCandidate(PeerConnectionObject* obj,
+                                            DelegateIceCandidate callback);
 
   void PeerConnectionCreateOffer(PeerConnectionObject* obj,
                                  const RTCOfferAnswerOptions* options);
+  void PeerConnectionCreateAnswer(PeerConnectionObject* obj,
+                                  const RTCOfferAnswerOptions* options);
 
   RTCErrorType PeerConnectionSetLocalDescription(
-        Context* context, PeerConnectionObject* obj, const RTCSessionDescription* desc, std::string& error);
+      Context* context,
+      PeerConnectionObject* obj,
+      const RTCSessionDescription* desc,
+      std::string& error);
+
+  RTCErrorType PeerConnectionSetRemoteDescription(
+      Context* context,
+      PeerConnectionObject* obj,
+      const RTCSessionDescription* desc,
+      char* error[]);
 
   char* ConvertString(const std::string str);
 

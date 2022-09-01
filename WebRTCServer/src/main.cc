@@ -32,6 +32,9 @@ void OnSuccess(PeerConnectionObject* pco, RTCSdpType type, const char* sdp) {
       std::cout << "Offer: \n" << sdp << std::endl;
     } break;
 
+    case RTCSdpType::Answer: {
+      LogPrint("Answer SDP: \n %s", sdp);
+    } break;
     default:
       // TODO:
       break;
@@ -57,8 +60,8 @@ std::string GetInput() {
   }
 
   std::stringstream ss;
-  for (std::vector<std::string>::const_iterator itr = v.begin();
-       itr != v.end(); ++itr) {
+  for (std::vector<std::string>::const_iterator itr = v.begin(); itr != v.end();
+       ++itr) {
     ss << *itr;
     ss << std::endl;
   }
@@ -80,6 +83,15 @@ int main() {
 
   std::cout << "Enter Remote Offer \n" << std::endl;
   auto RemoteOffer = GetInput();
+
+  RTCSessionDescription AnswerSD = {};
+  AnswerSD.type = RTCSdpType::Answer;
+  AnswerSD.sdp = RemoteOffer.c_str();
+
+  char* error[100];
+  auto errotTyp = plugin.PeerConnectionSetRemoteDescription(&ctx, pco, &AnswerSD, error);
+
+  plugin.PeerConnectionCreateAnswer(pco, &options);
 
   return 0;
 }
