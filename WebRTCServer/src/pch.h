@@ -33,6 +33,7 @@
 #include "rtc_base/async_tcp_socket.h"
 
 #include "test/vcm_capturer.h"
+#include "api/jsep.h"
 
 #ifdef _WIN32
 #include "rtc_base/win32.h"

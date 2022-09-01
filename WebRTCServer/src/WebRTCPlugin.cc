@@ -7,6 +7,8 @@
 #include "Context.h"
 #include "SSDO.h"
 
+#include "api/jsep.h"
+
 namespace webrtc {
 PeerConnectionObject* WebRTCPlugin::_ContextCreatePeerConnection(
     Context* context,
@@ -53,6 +55,18 @@ void WebRTCPlugin::PeerConnectionCreateAnswer(
     PeerConnectionObject* obj,
     const RTCOfferAnswerOptions* options) {
   obj->CreateAnswer(*options);
+}
+
+RTCErrorType WebRTCPlugin::WPCreateIceCandidate(
+    const RTCIceCandidateInit* options,
+    IceCandidateInterface** candidate) {
+  SdpParseError error;
+  IceCandidateInterface* _candidate = CreateIceCandidate(
+      options->sdpMid, options->sdpMLineIndex, options->candidate, &error);
+  if (_candidate == nullptr)
+    return RTCErrorType::INVALID_PARAMETER;
+  *candidate = _candidate;
+  return RTCErrorType::NONE;
 }
 
 RTCErrorType WebRTCPlugin::PeerConnectionSetLocalDescription(

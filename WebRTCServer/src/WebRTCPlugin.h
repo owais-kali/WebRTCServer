@@ -181,7 +181,7 @@ class WebRTCPlugin {
   void PeerConnectionCreateAnswer(PeerConnectionObject* obj,
                                   const RTCOfferAnswerOptions* options);
 
-  RTCErrorType CreateIceCandidate(const RTCIceCandidateInit* options,
+  RTCErrorType WPCreateIceCandidate(const RTCIceCandidateInit* options,
                                   IceCandidateInterface** candidate);
 
   RTCErrorType PeerConnectionSetLocalDescription(
