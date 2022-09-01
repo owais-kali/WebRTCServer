@@ -42,8 +42,29 @@ void OnIceCandidate(PeerConnectionObject* pco,
                     const char* candidate,
                     const char* sdpMid,
                     const int sdpMlineIndex) {
-                      LogPrint("OnIceCandidate\n");
-                    }
+  LogPrint("OnIceCandidate\n");
+}
+
+std::string GetInput() {
+  std::string line;
+  std::vector<std::string> v;
+
+  while (std::getline(std::cin, line)) {
+    if (line.empty()) {
+      break;
+    }
+    v.push_back(line);
+  }
+
+  std::stringstream ss;
+  for (std::vector<std::string>::const_iterator itr = v.begin();
+       itr != v.end(); ++itr) {
+    ss << *itr;
+    ss << std::endl;
+  }
+
+  return ss.str();
+}
 
 int main() {
   PeerConnectionObject* pco = plugin.ContextCreatePeerConnection(&ctx);
@@ -55,11 +76,10 @@ int main() {
 
   plugin.AddTracks(&ctx);
 
-  plugin.PeerConnectionCreateOffer(pco, &options);
+  // plugin.PeerConnectionCreateOffer(pco, &options);
 
   std::cout << "Enter Remote Offer \n" << std::endl;
-  char RemoteOffer[1024];
-  scanf("%s", RemoteOffer);
+  auto RemoteOffer = GetInput();
 
-  std::cout << "Remote Offer: \n"<< RemoteOffer << std::endl;
+  return 0;
 }
