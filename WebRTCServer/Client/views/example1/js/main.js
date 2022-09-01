@@ -20,19 +20,29 @@ let localStream;
 
 
 GetOfferBtn.onclick = async () => {
-  localStream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+  localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
   localVideo.srcObject = localStream;
 
+  await createPeerConnection();
+
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
 
   GetOfferBtn.disabled = true;
-  hangupButton.disabled = false;
+  SetAnswerBtn.disabled = false;
 
-  signaling.postMessage({type: 'ready'});
+  output('createOffer -> onOfferSuccess');
+  output('Offer SDP:begin');
+  output(offer.sdp);
+  output('Offer SDP:end');
 };
 
-hangupButton.onclick = async () => {
-  hangup();
-  signaling.postMessage({type: 'bye'});
+SetAnswerBtn.onclick = async () => {
+  var sdp = new RTCSessionDescription({
+    type: 'answer',
+    sdp: input()
+  });
+  pc.setRemoteDescription(sdp);
 };
 
 async function hangup() {
@@ -58,18 +68,9 @@ function createPeerConnection() {
       message.sdpMid = e.candidate.sdpMid;
       message.sdpMLineIndex = e.candidate.sdpMLineIndex;
     }
-    signaling.postMessage(message);
   };
   pc.ontrack = e => remoteVideo.srcObject = e.streams[0];
   localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-}
-
-async function makeCall() {
-  await createPeerConnection();
-
-  const offer = await pc.createOffer();
-  signaling.postMessage({type: 'offer', sdp: offer.sdp});
-  await pc.setLocalDescription(offer);
 }
 
 async function handleOffer(offer) {
@@ -81,7 +82,7 @@ async function handleOffer(offer) {
   await pc.setRemoteDescription(offer);
 
   const answer = await pc.createAnswer();
-  signaling.postMessage({type: 'answer', sdp: answer.sdp});
+  signaling.postMessage({ type: 'answer', sdp: answer.sdp });
   await pc.setLocalDescription(answer);
 }
 
@@ -103,5 +104,17 @@ async function handleCandidate(candidate) {
   } else {
     await pc.addIceCandidate(candidate);
   }
+}
+
+function output(log) {
+  var stdout = document.getElementById('stdout');
+  stdout.value = stdout.value + log + '\n';
+}
+
+function input() {
+  var stdin = document.getElementById('stdin');
+  var input = stdin.value;
+  stdin.value = '';
+  return input;
 }
 
