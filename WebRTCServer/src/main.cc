@@ -57,7 +57,9 @@ int main() {
 
   plugin.PeerConnectionCreateOffer(pco, &options);
 
-  std::cout << "Press Enter to Continue!" << std::endl;
-  int age;
-  scanf("%d", &age);
+  std::cout << "Enter Remote Offer \n" << std::endl;
+  char RemoteOffer[1024];
+  scanf("%s", RemoteOffer);
+
+  std::cout << "Remote Offer: \n"<< RemoteOffer << std::endl;
 }
