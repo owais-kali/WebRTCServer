@@ -16,12 +16,26 @@ WebRTCPlugin plugin;
 Context ctx;
 
 void OnSuccess(PeerConnectionObject* pco, RTCSdpType type, const char* sdp) {
-  RTCSessionDescription desc = {};
-  desc.sdp = sdp;
-  desc.type = type;
-  std::string error;
-  plugin.PeerConnectionSetLocalDescription(&ctx, pco, &desc, error);
-  std::cout << "error: "<<error << std::endl;
+  switch (type) {
+    case RTCSdpType::Offer: {
+      RTCSessionDescription desc = {};
+      desc.sdp = sdp;
+      desc.type = type;
+      std::string error;
+      auto errorType =
+          plugin.PeerConnectionSetLocalDescription(&ctx, pco, &desc, error);
+
+      if (errorType != webrtc::RTCErrorType::NONE) {
+        std::cout << "error: " << error << std::endl;
+      }
+
+      std::cout << "Offer: \n" << sdp << std::endl;
+    } break;
+
+    default:
+      // TODO:
+      break;
+  }
 }
 
 int main() {
@@ -31,9 +45,9 @@ int main() {
 
   plugin.PeerConnectionRegisterCallbackCreateSD(pco, OnSuccess, nullptr);
 
-  plugin.PeerConnectionCreateOffer(pco, &options);
+  plugin.AddTracks(&ctx);
 
-  // plugin.AddTracks(&ctx);
+  plugin.PeerConnectionCreateOffer(pco, &options);
 
   std::cout << "Press Enter to Continue!" << std::endl;
   int age;
