@@ -19,3 +19,15 @@ For Debug Build:
 
 To compile run:
 ```ninja -C out/Default```
+
+# Run Client Server
+requirement 
+nodejs: v16.14.0
+npm: 8.3.1
+
+Go to WebRTCServer/Client  
+```npm install```  
+```node index.js```
+
+Open Chrome Browser and go to   
+```http://localhost:3000/```
