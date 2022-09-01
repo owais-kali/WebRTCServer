@@ -1,7 +1,8 @@
 # Ignore everything:
-*
+**
 
-!WebRTCServer/*
+!/WebRTCServer/
+
 !.gitignore
 !BUILD.gn
 !README.md
