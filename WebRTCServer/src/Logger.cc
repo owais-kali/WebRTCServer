@@ -8,13 +8,14 @@
 
 namespace webrtc
 {
+    static char buf[204800];
     void LogPrint(const char* fmt, ...)
     {
         
 #if _DEBUG
         va_list vl;
         va_start(vl, fmt);
-        char buf[20480];
+        
 #if _WIN32
         vsprintf_s(buf, fmt, vl);
 #else

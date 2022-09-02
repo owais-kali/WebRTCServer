@@ -36,7 +36,6 @@ void PeerConnectionObject::OnDataChannel(
 void PeerConnectionObject::OnIceCandidate(
     const webrtc::IceCandidateInterface* candidate) {
   std::string out;
-  candidate->ToString(&out);
 
   if (!candidate->ToString(&out)) {
     //            DebugError("Can't make string form of sdp.");

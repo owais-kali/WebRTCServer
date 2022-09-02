@@ -46,7 +46,7 @@ void OnIceCandidate(PeerConnectionObject* pco,
                     const char* candidate,
                     const char* sdpMid,
                     const int sdpMlineIndex) {
-  LogPrint("OnIceCandidate\n");
+  LogPrint("OnIceCandidate:\n candidate: %s\n, sdpMid: %s\n, sdpMlineIndex: %d\n", candidate, sdpMid, sdpMlineIndex);
 }
 
 std::string GetInput() {
@@ -93,8 +93,8 @@ void SetRemoteOffer(PeerConnectionObject* pco) {
   plugin.PeerConnectionCreateAnswer(pco, &options);
 }
 
-void CreateICE(PeerConnectionObject* pco){
-  // plugin.WPCreateIceCandidate()
+void SetICE(){
+
 }
 
 int main() {
@@ -104,8 +104,8 @@ int main() {
   plugin.PeerConnectionRegisterOnIceCandidate(pco, OnIceCandidate);
 
   plugin.AddTracks(&ctx);
-
-  CreateICE(pco);
+  CreateOffer(pco);
+  // SetRemoteOffer(pco);
 
   sleep(1000);
 

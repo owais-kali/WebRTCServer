@@ -14,7 +14,7 @@ const GetICEBtn = document.getElementById('GetICEBtn')
 const SetICEBtn = document.getElementById('SetICEBtn')
 
 SetAnswerBtn.disabled = true;
-GetICEBtn.disabled = true;
+// GetICEBtn.disabled = true;
 SetICEBtn.disabled = true;
 
 const localVideo = document.getElementById('localVideo');
@@ -31,15 +31,15 @@ GetOfferBtn.onclick = async () => {
 
   await createPeerConnection();
 
-  const offer = await pc.createOffer();
-  await pc.setLocalDescription(offer);
+  // const offer = await pc.createOffer();
+  // await pc.setLocalDescription(offer);
 
   GetOfferBtn.disabled = true;
   SetAnswerBtn.disabled = false;
 
   // output('createOffer -> onOfferSuccess');
   // output('Offer SDP:begin');
-  output(offer.sdp);
+  // output(offer.sdp);
   // output('Offer SDP:end');
 
   SetICEBtn.disabled = false;
