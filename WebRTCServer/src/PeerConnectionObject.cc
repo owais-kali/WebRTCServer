@@ -36,7 +36,6 @@ void PeerConnectionObject::OnDataChannel(
 void PeerConnectionObject::OnIceCandidate(
     const webrtc::IceCandidateInterface* candidate) {
   std::string out;
-  candidate->ToString(&out);
 
   if (!candidate->ToString(&out)) {
     //            DebugError("Can't make string form of sdp.");
@@ -125,6 +124,13 @@ void PeerConnectionObject::CreateOffer(const RTCOfferAnswerOptions& options) {
   connection->CreateOffer(this, _options);
 }
 
+void PeerConnectionObject::CreateAnswer(const RTCOfferAnswerOptions& options) {
+  webrtc::PeerConnectionInterface::RTCOfferAnswerOptions _options;
+  _options.ice_restart = options.iceRestart;
+  _options.voice_activity_detection = options.voiceActivityDetection;
+  connection->CreateAnswer(this, _options);
+}
+
 RTCErrorType PeerConnectionObject::SetLocalDescription(
     const RTCSessionDescription& desc,
     webrtc::SetSessionDescriptionObserver* observer,
@@ -137,6 +143,21 @@ RTCErrorType PeerConnectionObject::SetLocalDescription(
     return RTCErrorType::SYNTAX_ERROR;
   }
   connection->SetLocalDescription(observer, _desc.release());
+  return RTCErrorType::NONE;
+}
+
+RTCErrorType PeerConnectionObject::SetRemoteDescription(
+    const RTCSessionDescription& desc,
+    webrtc::SetSessionDescriptionObserver* observer,
+    std::string& error) {
+  SdpParseError error_;
+  std::unique_ptr<SessionDescriptionInterface> _desc =
+      CreateSessionDescription(ConvertSdpType(desc.type), desc.sdp, &error_);
+  if (!_desc.get()) {
+    error = error_.description;
+    return RTCErrorType::SYNTAX_ERROR;
+  }
+  connection->SetRemoteDescription(observer, _desc.release());
   return RTCErrorType::NONE;
 }
 

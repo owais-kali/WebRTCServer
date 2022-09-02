@@ -83,6 +83,8 @@ class PeerConnectionObject : public webrtc::CreateSessionDescriptionObserver,
 
  public:
   void CreateOffer(const RTCOfferAnswerOptions& options);
+  void CreateAnswer(const RTCOfferAnswerOptions& options);
+
   void RegisterCallbackCreateSD(DelegateCreateSDSuccess onSuccess,
                                 DelegateCreateSDFailure onFailure) {
     onCreateSDSuccess = onSuccess;
@@ -97,6 +99,11 @@ class PeerConnectionObject : public webrtc::CreateSessionDescriptionObserver,
   }
 
   RTCErrorType SetLocalDescription(
+      const RTCSessionDescription& desc,
+      webrtc::SetSessionDescriptionObserver* observer,
+      std::string& error);
+
+  RTCErrorType SetRemoteDescription(
       const RTCSessionDescription& desc,
       webrtc::SetSessionDescriptionObserver* observer,
       std::string& error);

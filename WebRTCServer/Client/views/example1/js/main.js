@@ -10,7 +10,12 @@
 
 const GetOfferBtn = document.getElementById('GetOfferBtn');
 const SetAnswerBtn = document.getElementById('SetAnswerBtn');
+const GetICEBtn = document.getElementById('GetICEBtn')
+const SetICEBtn = document.getElementById('SetICEBtn')
+
 SetAnswerBtn.disabled = true;
+// GetICEBtn.disabled = true;
+SetICEBtn.disabled = true;
 
 const localVideo = document.getElementById('localVideo');
 const remoteVideo = document.getElementById('remoteVideo');
@@ -18,6 +23,7 @@ const remoteVideo = document.getElementById('remoteVideo');
 let pc;
 let localStream;
 
+var iceArray = [];
 
 GetOfferBtn.onclick = async () => {
   localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
@@ -25,16 +31,19 @@ GetOfferBtn.onclick = async () => {
 
   await createPeerConnection();
 
-  const offer = await pc.createOffer();
-  await pc.setLocalDescription(offer);
+  // const offer = await pc.createOffer();
+  // await pc.setLocalDescription(offer);
 
   GetOfferBtn.disabled = true;
   SetAnswerBtn.disabled = false;
 
-  output('createOffer -> onOfferSuccess');
-  output('Offer SDP:begin');
-  output(offer.sdp);
-  output('Offer SDP:end');
+  // output('createOffer -> onOfferSuccess');
+  // output('Offer SDP:begin');
+  // output(offer.sdp);
+  // output('Offer SDP:end');
+
+  SetICEBtn.disabled = false;
+  SetICEBtn.onclick = SetICE;
 };
 
 SetAnswerBtn.onclick = async () => {
@@ -58,51 +67,35 @@ async function hangup() {
 
 function createPeerConnection() {
   pc = new RTCPeerConnection();
-  pc.onicecandidate = e => {
-    const message = {
-      type: 'candidate',
-      candidate: null,
-    };
-    if (e.candidate) {
-      message.candidate = e.candidate.candidate;
-      message.sdpMid = e.candidate.sdpMid;
-      message.sdpMLineIndex = e.candidate.sdpMLineIndex;
-    }
-  };
+
+  pc.onicecandidate = onIceCandidate;
+
   pc.ontrack = e => remoteVideo.srcObject = e.streams[0];
   localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 }
 
-async function handleOffer(offer) {
-  if (pc) {
-    console.error('existing peerconnection');
-    return;
-  }
-  await createPeerConnection();
-  await pc.setRemoteDescription(offer);
-
-  const answer = await pc.createAnswer();
-  signaling.postMessage({ type: 'answer', sdp: answer.sdp });
-  await pc.setLocalDescription(answer);
-}
-
-async function handleAnswer(answer) {
-  if (!pc) {
-    console.error('no peerconnection');
-    return;
-  }
-  await pc.setRemoteDescription(answer);
-}
-
-async function handleCandidate(candidate) {
-  if (!pc) {
-    console.error('no peerconnection');
-    return;
-  }
-  if (!candidate.candidate) {
-    await pc.addIceCandidate(null);
+function onIceCandidate(evt) {
+  if (evt.candidate) {
+    iceArray.push(evt.candidate);
   } else {
-    await pc.addIceCandidate(candidate);
+    output("end of ice candidate" + evt.eventPhase);
+    GetICEBtn.disabled = false;
+    GetICEBtn.onclick = GetICE;
+  }
+}
+
+function GetICE() {
+  output('ICE:begin');
+  output(JSON.stringify(iceArray));
+  iceArray = [];
+  output('ICE:end');
+}
+
+function SetICE() {
+  var ices = JSON.parse(input());
+  for (var ice of ices) {
+    var iceObj = new RTCIceCandidate(ice);
+    pc.addIceCandidate(iceObj);
   }
 }
 

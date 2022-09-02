@@ -18,6 +18,115 @@ struct RTCSessionDescription {
   const char* sdp;
 };
 
+enum class RTCPeerConnectionState {
+  New,
+  Connecting,
+  Connected,
+  Disconnected,
+  Failed,
+  Closed
+};
+
+enum class RTCIceConnectionState {
+  New,
+  Checking,
+  Connected,
+  Completed,
+  Failed,
+  Disconnected,
+  Closed,
+  Max
+};
+
+enum class RTCSignalingState {
+  Stable,
+  HaveLocalOffer,
+  HaveRemoteOffer,
+  HaveLocalPranswer,
+  HaveRemotePranswer,
+  Closed
+};
+
+enum class RTCPeerConnectionEventType {
+  ConnectionStateChange,
+  DataChannel,
+  IceCandidate,
+  IceConnectionStateChange,
+  Track
+};
+
+enum class SdpSemanticsType { UnifiedPlan };
+
+enum class RTCIceCredentialType { Password, OAuth };
+
+enum class TrackKind { Audio, Video };
+
+struct RTCOfferAnswerOptions {
+  bool iceRestart;
+  bool voiceActivityDetection;
+};
+
+struct RTCIceServer {
+  char* credential;
+  char* credentialType;
+  char** urls;
+  int urlsLength;
+  char* username;
+};
+
+struct RTCConfiguration {
+  RTCIceServer* iceServers;
+  int iceServersLength;
+  char* iceServerPolicy;
+};
+
+struct RTCIceCandidate {
+  char* candidate;
+  char* sdpMid;
+  int sdpMLineIndex;
+};
+
+struct RTCIceCandidateInit {
+  char* candidate;
+  char* sdpMid;
+  int32_t sdpMLineIndex;
+};
+
+char* ConvertString(const std::string str);
+
+struct Candidate {
+  char* candidate;
+  int32_t component;
+  char* foundation;
+  char* ip;
+  uint16_t port;
+  uint32_t priority;
+  char* address;
+  char* protocol;
+  char* relatedAddress;
+  uint16_t relatedPort;
+  char* tcpType;
+  char* type;
+  char* usernameFragment;
+
+  Candidate& operator=(const cricket::Candidate& obj) {
+    candidate = ConvertString(obj.ToString());
+    component = obj.component();
+    foundation = ConvertString(obj.foundation());
+    ip = ConvertString(obj.address().ipaddr().ToString());
+    port = obj.address().port();
+    priority = obj.priority();
+    address = ConvertString(obj.address().ToString());
+    protocol = ConvertString(obj.protocol());
+    relatedAddress = ConvertString(obj.related_address().ToString());
+    relatedPort = obj.related_address().port();
+    tcpType = ConvertString(obj.tcptype());
+    type = ConvertString(obj.type());
+    usernameFragment = ConvertString(obj.username());
+    return *this;
+  }
+};
+
 // Callback Delegates
 using DelegateCreateSDSuccess = void (*)(PeerConnectionObject*,
                                          RTCSdpType,
@@ -50,12 +159,6 @@ using DelegateOnTrack = void (*)(PeerConnectionObject*,
 using DelegateOnRemoveTrack = void (*)(PeerConnectionObject*,
                                        webrtc::RtpReceiverInterface*);
 ////////////////////////////////////
-
-struct RTCOfferAnswerOptions {
-  bool iceRestart;
-  bool voiceActivityDetection;
-};
-
 class WebRTCPlugin {
  public:
   PeerConnectionObject* _ContextCreatePeerConnection(
@@ -70,17 +173,31 @@ class WebRTCPlugin {
       DelegateCreateSDSuccess onSuccess,
       DelegateCreateSDFailure onFailure);
 
-  void PeerConnectionRegisterOnIceCandidate(
-    PeerConnectionObject* obj,
-    DelegateIceCandidate callback);
+  void PeerConnectionRegisterOnIceCandidate(PeerConnectionObject* obj,
+                                            DelegateIceCandidate callback);
 
   void PeerConnectionCreateOffer(PeerConnectionObject* obj,
                                  const RTCOfferAnswerOptions* options);
+  void PeerConnectionCreateAnswer(PeerConnectionObject* obj,
+                                  const RTCOfferAnswerOptions* options);
+
+  RTCErrorType WPCreateIceCandidate(const RTCIceCandidateInit* options,
+                                  IceCandidateInterface** candidate);
 
   RTCErrorType PeerConnectionSetLocalDescription(
-        Context* context, PeerConnectionObject* obj, const RTCSessionDescription* desc, std::string& error);
+      Context* context,
+      PeerConnectionObject* obj,
+      const RTCSessionDescription* desc,
+      std::string& error);
 
-  char* ConvertString(const std::string str);
+  RTCErrorType PeerConnectionSetRemoteDescription(
+      Context* context,
+      PeerConnectionObject* obj,
+      const RTCSessionDescription* desc,
+      char* error[]);
+
+  PeerConnectionInterface::SignalingState PeerConnectionSignalingState(
+      PeerConnectionObject* obj);
 
   std::string GetEnvVarOrDefault(const char* env_var_name,
                                  const char* default_value) {

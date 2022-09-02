@@ -1,5 +1,6 @@
 #pragma clang diagnostic ignored "-Wunused-variable"
 #pragma clang diagnostic ignored "-Wunused-result"
+#pragma clang diagnostic ignored "-Wunreachable-code"
 
 #include <unistd.h>
 
@@ -32,6 +33,9 @@ void OnSuccess(PeerConnectionObject* pco, RTCSdpType type, const char* sdp) {
       std::cout << "Offer: \n" << sdp << std::endl;
     } break;
 
+    case RTCSdpType::Answer: {
+      LogPrint("Answer SDP: \n%s", sdp);
+    } break;
     default:
       // TODO:
       break;
@@ -42,7 +46,7 @@ void OnIceCandidate(PeerConnectionObject* pco,
                     const char* candidate,
                     const char* sdpMid,
                     const int sdpMlineIndex) {
-  LogPrint("OnIceCandidate\n");
+  LogPrint("OnIceCandidate:\n candidate: %s\n, sdpMid: %s\n, sdpMlineIndex: %d\n", candidate, sdpMid, sdpMlineIndex);
 }
 
 std::string GetInput() {
@@ -57,8 +61,8 @@ std::string GetInput() {
   }
 
   std::stringstream ss;
-  for (std::vector<std::string>::const_iterator itr = v.begin();
-       itr != v.end(); ++itr) {
+  for (std::vector<std::string>::const_iterator itr = v.begin(); itr != v.end();
+       ++itr) {
     ss << *itr;
     ss << std::endl;
   }
@@ -66,20 +70,44 @@ std::string GetInput() {
   return ss.str();
 }
 
+void CreateOffer(PeerConnectionObject* pco){
+  const RTCOfferAnswerOptions options{false, true};
+  plugin.PeerConnectionCreateOffer(pco, &options);
+}
+
+void SetRemoteOffer(PeerConnectionObject* pco) {
+  const RTCOfferAnswerOptions options{false, true};
+
+  std::cout << "Enter Remote Offer \n" << std::endl;
+  auto RemoteOffer = GetInput();
+
+  RTCSessionDescription OfferSD = {};
+  OfferSD.type = RTCSdpType::Offer;
+  OfferSD.sdp = RemoteOffer.c_str();
+
+  char* error[1000];
+  auto errotTyp =
+      plugin.PeerConnectionSetRemoteDescription(&ctx, pco, &OfferSD, error);
+
+  LogPrint("Create Answer");
+  plugin.PeerConnectionCreateAnswer(pco, &options);
+}
+
+void SetICE(){
+
+}
+
 int main() {
   PeerConnectionObject* pco = plugin.ContextCreatePeerConnection(&ctx);
-
-  const RTCOfferAnswerOptions options{false, true};
 
   plugin.PeerConnectionRegisterCallbackCreateSD(pco, OnSuccess, nullptr);
   plugin.PeerConnectionRegisterOnIceCandidate(pco, OnIceCandidate);
 
   plugin.AddTracks(&ctx);
+  CreateOffer(pco);
+  // SetRemoteOffer(pco);
 
-  // plugin.PeerConnectionCreateOffer(pco, &options);
-
-  std::cout << "Enter Remote Offer \n" << std::endl;
-  auto RemoteOffer = GetInput();
+  sleep(1000);
 
   return 0;
 }

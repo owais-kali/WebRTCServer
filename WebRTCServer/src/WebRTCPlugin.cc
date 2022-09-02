@@ -7,6 +7,8 @@
 #include "Context.h"
 #include "SSDO.h"
 
+#include "api/jsep.h"
+
 namespace webrtc {
 PeerConnectionObject* WebRTCPlugin::_ContextCreatePeerConnection(
     Context* context,
@@ -49,6 +51,24 @@ void WebRTCPlugin::PeerConnectionCreateOffer(
   obj->CreateOffer(*options);
 }
 
+void WebRTCPlugin::PeerConnectionCreateAnswer(
+    PeerConnectionObject* obj,
+    const RTCOfferAnswerOptions* options) {
+  obj->CreateAnswer(*options);
+}
+
+RTCErrorType WebRTCPlugin::WPCreateIceCandidate(
+    const RTCIceCandidateInit* options,
+    IceCandidateInterface** candidate) {
+  SdpParseError error;
+  IceCandidateInterface* _candidate = CreateIceCandidate(
+      options->sdpMid, options->sdpMLineIndex, options->candidate, &error);
+  if (_candidate == nullptr)
+    return RTCErrorType::INVALID_PARAMETER;
+  *candidate = _candidate;
+  return RTCErrorType::NONE;
+}
+
 RTCErrorType WebRTCPlugin::PeerConnectionSetLocalDescription(
     Context* context,
     PeerConnectionObject* obj,
@@ -60,7 +80,24 @@ RTCErrorType WebRTCPlugin::PeerConnectionSetLocalDescription(
   return errorType;
 }
 
-char* WebRTCPlugin::ConvertString(const std::string str) {
+RTCErrorType WebRTCPlugin::PeerConnectionSetRemoteDescription(
+    Context* context,
+    PeerConnectionObject* obj,
+    const RTCSessionDescription* desc,
+    char* error[]) {
+  std::string error_;
+  RTCErrorType errorType = obj->SetRemoteDescription(
+      *desc, context->GetObserver(obj->connection.get()), error_);
+  *error = ConvertString(error_);
+  return errorType;
+}
+
+PeerConnectionInterface::SignalingState
+WebRTCPlugin::PeerConnectionSignalingState(PeerConnectionObject* obj) {
+  return obj->connection->signaling_state();
+}
+
+char* ConvertString(const std::string str) {
   const size_t size = str.size();
   char* ret = static_cast<char*>(CoTaskMemAlloc(size + sizeof(char)));
   str.copy(ret, size);

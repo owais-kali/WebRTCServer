@@ -1,10 +1,10 @@
 # WebRTCServer
 
-This is a simple WebRTC server using https://chromium.googlesource.com/external/webrtc/
+This is a simple WebRTC server using https://webrtc.googlesource.com/src/
 
 # How to Build
 Since webrtc library is very big I have only added files that I have created. To build you will need to clone webrtc source code from
-[here](https://chromium.googlesource.com/external/webrtc/)
+[here](https://webrtc.googlesource.com/src/)
 
 now clone this repo inside src/examples folder
 and replace src/examples/BUILD.gn with BUILD.gn in this repo.

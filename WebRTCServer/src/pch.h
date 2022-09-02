@@ -30,10 +30,10 @@
 #include "rtc_base/string_utils.h"
 #include "rtc_base/physical_socket_server.h"
 #include "rtc_base/third_party/sigslot/sigslot.h"
-#include "rtc_base/atomic_ops.h"
 #include "rtc_base/async_tcp_socket.h"
 
 #include "test/vcm_capturer.h"
+#include "api/jsep.h"
 
 #ifdef _WIN32
 #include "rtc_base/win32.h"
