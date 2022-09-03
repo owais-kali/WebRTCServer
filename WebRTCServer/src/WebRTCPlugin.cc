@@ -109,4 +109,9 @@ void WebRTCPlugin::AddTracks(Context* context) {
   context->AddTracks();
 }
 
+extern "C" SPACE_INTERFACE_EXPORT int print(){
+  printf("Hello world");
+  return 200;
+}
+
 }  // namespace webrtc

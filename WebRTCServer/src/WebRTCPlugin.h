@@ -5,6 +5,10 @@
 
 namespace webrtc {
 
+#if defined(__linux__)
+    #define SPACE_INTERFACE_EXPORT __attribute__ ((visibility ("default")))
+#endif
+
 namespace webrtc = ::webrtc;
 
 class Context;

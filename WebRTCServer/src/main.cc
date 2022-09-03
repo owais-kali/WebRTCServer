@@ -105,11 +105,11 @@ void StartServer() {
 
   plugin.AddTracks(&ctx);
 
-  // SetRemoteOffer(pco);
+  SetRemoteOffer(pco);
 
   sleep(1000);
 }
 
 int main() {
-  return 0;
+  StartServer();
 }
