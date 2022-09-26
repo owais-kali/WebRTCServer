@@ -36,7 +36,7 @@ MESSAGE("PulseAudio_FOUND = ${PulseAudio_FOUND}")
 
 # webrtc build
 #if (NOT EXISTS ${WEBRTCROOT}/src/out/${CMAKE_BUILD_TYPE}/args.gn)
-    set(WEBRTCARGS rtc_include_tests=true\nrtc_enable_protobuf=false\nrtc_build_examples=false\nrtc_build_tools=false\ntreat_warnings_as_errors=false\nrtc_enable_libevent=false\nrtc_build_libevent=false\n)
+    set(WEBRTCARGS rtc_include_tests=true\nrtc_enable_protobuf=true\nrtc_build_examples=true\nrtc_build_tools=false\ntreat_warnings_as_errors=false\nrtc_enable_libevent=false\nrtc_build_libevent=false\n)
     set(WEBRTCARGS use_custom_libcxx=false\n${WEBRTCARGS})
     # debug/release
     if (CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -117,8 +117,11 @@ SET(WEBRTCEXTRAOBJS ${WEBRTJSONCPPCOBJS} ${WEBRTP2POBJ} ${WEBRTTASK})
 
 # project target
 FILE(GLOB SOURCE src/*.cc)
-add_executable(${CMAKE_PROJECT_NAME} ${SOURCE} ${WEBRTCEXTRAOBJS})
+FILE(GLOB HEADER inc/*.h)
+
+add_executable(${CMAKE_PROJECT_NAME} ${SOURCE} ${HEADER} ${WEBRTCEXTRAOBJS})
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE src)
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE inc)
 
 # webrtc
 set(WEBRTCINCLUDE ${WEBRTCROOT}/src ${WEBRTCROOT}/src/third_party/abseil-cpp ${WEBRTCROOT}/src/third_party/jsoncpp/source/include ${WEBRTCROOT}/src/third_party/jsoncpp/generated ${WEBRTCROOT}/src/third_party/libyuv/include)
@@ -187,5 +190,3 @@ if(PROJECTVERSION)
     SET(CPACK_PACKAGE_VERSION "${PROJECTVERSION}")
 endif()
 INCLUDE(CPack)
-
-add_subdirectory(src)
