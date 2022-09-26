@@ -1,8 +1,1 @@
-# Ignore everything:
-**
-
-!/WebRTCServer/
-
-!.gitignore
-!BUILD.gn
-!README.md
+cmake-build-debug
