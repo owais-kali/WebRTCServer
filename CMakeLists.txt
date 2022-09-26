@@ -4,9 +4,10 @@ project(WebRTCServer)
 set(WEBRTCROOT "${CMAKE_CURRENT_SOURCE_DIR}/.." CACHE STRING "WEBRTC root directory")
 set(WEBRTCDESKTOPCAPTURE "OFF" CACHE STRING "WEBRTC Desktop capture")
 
-#if (NOT CMAKE_BUILD_TYPE)
+message(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
-#endif ()
+endif ()
 MESSAGE("CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}\nWEBRTCROOT = ${WEBRTCROOT}\nWEBRTCDESKTOPCAPTURE= ${WEBRTCDESKTOPCAPTURE}\nCMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}")
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -35,7 +36,7 @@ find_package(PulseAudio QUIET)
 MESSAGE("PulseAudio_FOUND = ${PulseAudio_FOUND}")
 
 # webrtc build
-#if (NOT EXISTS ${WEBRTCROOT}/src/out/${CMAKE_BUILD_TYPE}/args.gn)
+if (NOT EXISTS ${WEBRTCROOT}/src/out/${CMAKE_BUILD_TYPE}/args.gn)
     set(WEBRTCARGS rtc_include_tests=true\nrtc_enable_protobuf=true\nrtc_build_examples=true\nrtc_build_tools=false\ntreat_warnings_as_errors=false\nrtc_enable_libevent=false\nrtc_build_libevent=false\n)
     set(WEBRTCARGS use_custom_libcxx=false\n${WEBRTCARGS})
     # debug/release
@@ -97,7 +98,7 @@ MESSAGE("PulseAudio_FOUND = ${PulseAudio_FOUND}")
 
     # write conf file
     FILE(WRITE ${WEBRTCROOT}/src/out/${CMAKE_BUILD_TYPE}/args.gn ${WEBRTCARGS})
-#endif ()
+endif ()
 
 set(WEBRTCOBJS ${WEBRTCROOT}/src/out/${CMAKE_BUILD_TYPE}/obj)
 
@@ -150,8 +151,8 @@ if (CMAKE_SYSTEM_PROCESSOR MATCHES "armv6.*")
     add_definitions(-marm -march=armv6 -mfpu=vfp -mfloat-abi=hard)
 endif ()
 if (EXISTS ${WEBRTCROOT}/src/out/${CMAKE_BUILD_TYPE}/obj/modules/desktop_capture/desktop_capture.ninja)
-    add_definitions(-DUSE_X11)
-    target_link_libraries(${CMAKE_PROJECT_NAME} X11 Xext Xdamage Xfixes Xcomposite Xrandr Xtst)
+#    add_definitions(-DUSE_X11)
+#    target_link_libraries(${CMAKE_PROJECT_NAME} X11 Xext Xdamage Xfixes Xcomposite Xrandr Xtst)
 endif ()
 # civetweb
 add_definitions(-DCRYPTO_LIB="libcrypto.so.1.1" -DSSL_LIB="libssl.so.1.1")
