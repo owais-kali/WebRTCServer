@@ -103,7 +103,7 @@ void StartServer() {
   plugin.PeerConnectionRegisterCallbackCreateSD(pco, OnSuccess, nullptr);
   plugin.PeerConnectionRegisterOnIceCandidate(pco, OnIceCandidate);
 
-  plugin.AddTracks(&ctx);
+  //plugin.AddTracks(&ctx);
 
   SetRemoteOffer(pco);
 
