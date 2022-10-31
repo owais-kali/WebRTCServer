@@ -1,5 +1,8 @@
-cmake-build-debug
-cmake-build-default
-build
-.vscode
-.idea
+# Ignore everything:
+**
+
+!/WebRTCServer/
+
+!.gitignore
+!BUILD.gn
+!README.md
