@@ -1,1 +1,5 @@
 cmake-build-debug
+cmake-build-default
+build
+.vscode
+.idea
