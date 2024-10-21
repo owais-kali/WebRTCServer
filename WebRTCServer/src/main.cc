@@ -10,6 +10,9 @@
 #include "PeerConnectionObject.h"
 #include "WebRTCPlugin.h"
 
+#include <thread>
+#include <chrono>
+
 using namespace webrtc;
 
 WebRTCPlugin plugin;
@@ -78,8 +81,9 @@ int main() {
 
   // plugin.PeerConnectionCreateOffer(pco, &options);
 
-  std::cout << "Enter Remote Offer \n" << std::endl;
-  auto RemoteOffer = GetInput();
+	auto csdo = unity::webrtc::CreateSessionDescriptionObserver::Create(pco);
+	pco->CreateOffer(RTCOfferAnswerOptions(), csdo.get());
 
+  std::this_thread::sleep_for(std::chrono::seconds(60));
   return 0;
 }

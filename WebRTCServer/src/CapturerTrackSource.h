@@ -9,7 +9,7 @@ class CapturerTrackSource : public webrtc::VideoTrackSource {
 protected:
   explicit CapturerTrackSource(
       std::unique_ptr<webrtc::test::VcmCapturer> capturer)
-      : VideoTrackSource(/*remote=*/false), capturer_(std::move(capturer)) {};
+      : VideoTrackSource(/*remote=*/false), capturer_(std::move(capturer)) {}
 
 private:
   rtc::VideoSourceInterface<webrtc::VideoFrame>* source() override;

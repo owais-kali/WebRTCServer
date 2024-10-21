@@ -1,4 +1,5 @@
 #pragma once
+#include "DummyAudioDevice.h"
 #include "PeerConnectionObject.h"
 
 namespace webrtc {
@@ -26,7 +27,7 @@ class Context {
   std::unique_ptr<TaskQueueFactory> m_taskQueueFactory;
   rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface>
       m_peerConnectionFactory;
-  // rtc::scoped_refptr<DummyAudioDevice> m_audioDevice;
+  rtc::scoped_refptr<unity::webrtc::DummyAudioDevice> m_audioDevice;
   std::vector<rtc::scoped_refptr<const webrtc::RTCStatsReport>>
       m_listStatsReport;
   std::map<const PeerConnectionObject*,

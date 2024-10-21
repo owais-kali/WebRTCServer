@@ -8,6 +8,21 @@
 #include "api/audio_codecs/builtin_audio_encoder_factory.h"
 #include "api/task_queue/default_task_queue_factory.h"
 
+#include <memory>
+
+#include "api/video_codecs/video_decoder_factory.h"
+#include "api/video_codecs/video_decoder_factory_template.h"
+#include "api/video_codecs/video_decoder_factory_template_dav1d_adapter.h"
+#include "api/video_codecs/video_decoder_factory_template_libvpx_vp8_adapter.h"
+#include "api/video_codecs/video_decoder_factory_template_libvpx_vp9_adapter.h"
+#include "api/video_codecs/video_decoder_factory_template_open_h264_adapter.h"
+#include "api/video_codecs/video_encoder_factory.h"
+#include "api/video_codecs/video_encoder_factory_template.h"
+#include "api/video_codecs/video_encoder_factory_template_libaom_av1_adapter.h"
+#include "api/video_codecs/video_encoder_factory_template_libvpx_vp8_adapter.h"
+#include "api/video_codecs/video_encoder_factory_template_libvpx_vp9_adapter.h"
+#include "api/video_codecs/video_encoder_factory_template_open_h264_adapter.h"
+
 namespace webrtc {
 
 using namespace webrtc;
@@ -21,13 +36,25 @@ Context::Context()
 
   rtc::InitializeSSL();
 
+  m_audioDevice = m_workerThread->BlockingCall(
+	[&]() { return rtc::make_ref_counted<unity::webrtc::DummyAudioDevice>(m_taskQueueFactory.get()); });
+
   m_peerConnectionFactory = webrtc::CreatePeerConnectionFactory(
-      m_workerThread.get() /* network_thread */,
-      m_workerThread.get() /* worker_thread */, m_signalingThread.get(),
-      nullptr /* default_adm */, CreateBuiltinAudioEncoderFactory(),
-      CreateBuiltinAudioDecoderFactory(), CreateBuiltinVideoEncoderFactory(),
-      CreateBuiltinVideoDecoderFactory(), nullptr /* audio_mixer */,
-      nullptr /* audio_processing */);
+      nullptr /* network_thread */, nullptr /* worker_thread */,
+      m_signalingThread.get(), m_audioDevice /* default_adm */,
+      webrtc::CreateBuiltinAudioEncoderFactory(),
+      webrtc::CreateBuiltinAudioDecoderFactory(),
+      std::make_unique<webrtc::VideoEncoderFactoryTemplate<
+          webrtc::LibvpxVp8EncoderTemplateAdapter,
+          webrtc::LibvpxVp9EncoderTemplateAdapter,
+          webrtc::OpenH264EncoderTemplateAdapter,
+          webrtc::LibaomAv1EncoderTemplateAdapter>>(),
+      std::make_unique<webrtc::VideoDecoderFactoryTemplate<
+          webrtc::LibvpxVp8DecoderTemplateAdapter,
+          webrtc::LibvpxVp9DecoderTemplateAdapter,
+          webrtc::OpenH264DecoderTemplateAdapter,
+          webrtc::Dav1dDecoderTemplateAdapter>>(),
+      nullptr /* audio_mixer */, nullptr /* audio_processing */);
 
   if (!m_peerConnectionFactory) {
     std::cout << "Failed to initialize PeerConnectionFactory" << std::endl;
