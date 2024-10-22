@@ -1,17 +1,18 @@
 #pragma clang diagnostic ignored "-Wunused-variable"
 #pragma clang diagnostic ignored "-Wunused-result"
+#pragma clang diagnostic ignored "-Wunreachable-code"
 
 #include <unistd.h>
 
+#include <chrono>
 #include <cstdio>
+#include <fstream>
 #include <iostream>
+#include <thread>
 
 #include "Context.h"
 #include "PeerConnectionObject.h"
 #include "WebRTCPlugin.h"
-
-#include <thread>
-#include <chrono>
 
 using namespace webrtc;
 
@@ -60,8 +61,8 @@ std::string GetInput() {
   }
 
   std::stringstream ss;
-  for (std::vector<std::string>::const_iterator itr = v.begin();
-       itr != v.end(); ++itr) {
+  for (std::vector<std::string>::const_iterator itr = v.begin(); itr != v.end();
+       ++itr) {
     ss << *itr;
     ss << std::endl;
   }
@@ -70,6 +71,18 @@ std::string GetInput() {
 }
 
 int main() {
+  std::ofstream fifo("/tmp/webrtc_write");
+
+  if (!fifo) {
+    std::cerr << "Error opening FIFO for writing" << std::endl;
+    return 1;
+  }
+
+  fifo << "Hello from C++!" << std::endl;
+  fifo.close();
+
+  return 0;
+
   PeerConnectionObject* pco = plugin.ContextCreatePeerConnection(&ctx);
 
   const RTCOfferAnswerOptions options{false, true};
@@ -81,8 +94,8 @@ int main() {
 
   // plugin.PeerConnectionCreateOffer(pco, &options);
 
-	auto csdo = unity::webrtc::CreateSessionDescriptionObserver::Create(pco);
-	pco->CreateOffer(RTCOfferAnswerOptions(), csdo.get());
+  // auto csdo = unity::webrtc::CreateSessionDescriptionObserver::Create(pco);
+  // pco->CreateOffer(RTCOfferAnswerOptions(), csdo.get());
 
   std::this_thread::sleep_for(std::chrono::seconds(60));
   return 0;
