@@ -1,58 +1,113 @@
 #pragma once
-#include "DummyAudioDevice.h"
+#include <mutex>
+#include <map>
+#include "rtc_base/ref_count.h"
 #include "PeerConnectionObject.h"
+#include "DummyAudioDevice.h"
+// #include "UnityVideoTrackSource.h"
 
-namespace webrtc {
+namespace unity
+{
+    namespace webrtc
+    {
+        using namespace ::webrtc;
 
-enum class RTCSdpType;
+        class IGraphicsDevice;
+        class ProfilerMarkerFactory;
+        struct ContextDependencies
+        {
+            IGraphicsDevice* device;
+            ProfilerMarkerFactory* profiler;
+        };
 
-class Context {
- public:
-  Context();
+        class Context;
+        class MediaStreamObserver;
+        class SetSessionDescriptionObserver;
+        class ContextManager
+        {
+        public:
+            static ContextManager* GetInstance();
+            ~ContextManager();
 
-  // PeerConnection
-  PeerConnectionObject* CreatePeerConnection(
-      const webrtc::PeerConnectionInterface::RTCConfiguration& config);
-  void AddObserver(
-      const webrtc::PeerConnectionInterface* connection,
-      const rtc::scoped_refptr<SetSessionDescriptionObserver>& observer);
-  SetSessionDescriptionObserver* GetObserver(
-      webrtc::PeerConnectionInterface* connection);
+            Context* GetContext(int uid) const;
+            Context* CreateContext(int uid, ContextDependencies& dependencies);
+            void DestroyContext(int uid);
+            void SetCurContext(Context*);
+            bool Exists(Context* context);
+            using ContextPtr = std::unique_ptr<Context>;
+            Context* curContext = nullptr;
+            std::mutex mutex;
 
-  void AddTracks();
+        private:
+            std::map<int, ContextPtr> m_contexts;
+            static std::unique_ptr<ContextManager> s_instance;
+        };
 
- private:
-  std::unique_ptr<rtc::Thread> m_workerThread;
-  std::unique_ptr<rtc::Thread> m_signalingThread;
-  std::unique_ptr<TaskQueueFactory> m_taskQueueFactory;
-  rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface>
-      m_peerConnectionFactory;
-  rtc::scoped_refptr<unity::webrtc::DummyAudioDevice> m_audioDevice;
-  std::vector<rtc::scoped_refptr<const webrtc::RTCStatsReport>>
-      m_listStatsReport;
-  std::map<const PeerConnectionObject*,
-           rtc::scoped_refptr<PeerConnectionObject>>
-      m_mapClients;
-  std::map<const webrtc::MediaStreamInterface*,
-           std::unique_ptr<MediaStreamObserver>>
-      m_mapMediaStreamObserver;
-  std::map<const webrtc::PeerConnectionInterface*,
-           rtc::scoped_refptr<SetSessionDescriptionObserver>>
-      m_mapSetSessionDescriptionObserver;
-  // std::map<const DataChannelInterface*, std::unique_ptr<DataChannelObject>>
-  // m_mapDataChannels; std::map<const uint32_t,
-  // std::shared_ptr<UnityVideoRenderer>> m_mapVideoRenderer; std::map<const
-  // AudioTrackSinkAdapter*, std::unique_ptr<AudioTrackSinkAdapter>>
-  // m_mapAudioTrackAndSink;
-  std::map<const rtc::RefCountInterface*,
-           rtc::scoped_refptr<rtc::RefCountInterface>>
-      m_mapRefPtr;
+        class Context {
+        public:
+            explicit Context(ContextDependencies& dependencies);
+            ~Context();
 
-  static uint32_t s_rendererId;
-  static uint32_t GenerateRendererId();
-};
+            bool ExistsRefPtr(const rtc::RefCountInterface* ptr) const
+            {
+                return m_mapRefPtr.find(ptr) != m_mapRefPtr.end();
+            }
+            template<typename T>
+            void AddRefPtr(rtc::scoped_refptr<T> refptr)
+            {
+                m_mapRefPtr.emplace(refptr.get(), refptr);
+            }
+            void AddRefPtr(rtc::RefCountInterface* ptr) { m_mapRefPtr.emplace(ptr, ptr); }
 
-webrtc::SdpType ConvertSdpType(RTCSdpType type);
-RTCSdpType ConvertSdpType(webrtc::SdpType type);
+            template<typename T>
+            void RemoveRefPtr(rtc::scoped_refptr<T>& refptr)
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+                m_mapRefPtr.erase(refptr.get());
+            }
+            template<typename T>
+            void RemoveRefPtr(T* ptr)
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+                m_mapRefPtr.erase(ptr);
+            }
 
-}  // namespace webrtc
+            // Audio Source
+            // rtc::scoped_refptr<AudioSourceInterface> CreateAudioSource();
+
+            // Video Source
+            // rtc::scoped_refptr<UnityVideoTrackSource> CreateVideoSource();
+
+            // MediaStreamTrack
+            rtc::scoped_refptr<VideoTrackInterface>
+                CreateVideoTrack(const std::string& label, webrtc::VideoTrackSourceInterface* source);
+            rtc::scoped_refptr<AudioTrackInterface>
+                CreateAudioTrack(const std::string& label, webrtc::AudioSourceInterface* source);
+
+            // PeerConnection
+            PeerConnectionObject* CreatePeerConnection(const PeerConnectionInterface::RTCConfiguration& config);
+            void DeletePeerConnection(PeerConnectionObject* obj);
+
+            // DataChannel
+            DataChannelInterface*
+                CreateDataChannel(PeerConnectionObject* obj, const char* label, const DataChannelInit& options);
+            void AddDataChannel(rtc::scoped_refptr<DataChannelInterface> channel, PeerConnectionObject& pc);
+            DataChannelObject* GetDataChannelObject(const DataChannelInterface* channel);
+            void DeleteDataChannel(DataChannelInterface* channel);
+
+            // mutex;
+            std::mutex mutex;
+        private:
+            std::unique_ptr<rtc::Thread> m_workerThread;
+            std::unique_ptr<rtc::Thread> m_signalingThread;
+            std::unique_ptr<TaskQueueFactory> m_taskQueueFactory;
+            rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> m_peerConnectionFactory;
+            rtc::scoped_refptr<DummyAudioDevice> m_audioDevice;
+            std::map<const PeerConnectionObject*, std::unique_ptr<PeerConnectionObject>> m_mapClients;
+
+            std::map<const DataChannelInterface*, std::unique_ptr<DataChannelObject>> m_mapDataChannels;
+            std::map<const rtc::RefCountInterface*, rtc::scoped_refptr<rtc::RefCountInterface>> m_mapRefPtr;
+
+        };
+    }
+}

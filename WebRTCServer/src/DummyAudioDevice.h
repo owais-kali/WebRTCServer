@@ -5,7 +5,7 @@
 
 #include <modules/audio_device/include/audio_device.h>
 #include <rtc_base/platform_thread.h>
-// #include <rtc_base/task_queue.h>
+#include <rtc_base/task_queue.h>
 #include <rtc_base/task_utils/repeating_task.h>
 
 #include "WebRTCPlugin.h"

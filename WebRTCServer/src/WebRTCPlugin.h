@@ -1,101 +1,149 @@
 #pragma once
-#include <iostream>
 
-#include "pch.h"
+#include <api/frame_transformer_interface.h>
+#include <api/media_stream_interface.h>
+#include <api/rtc_error.h>
 
-namespace webrtc {
+struct IUnityInterfaces;
 
-namespace webrtc = ::webrtc;
+namespace unity
+{
+	namespace webrtc
+	{
+        using namespace ::webrtc;
 
-class Context;
-class PeerConnectionObject;
-class PeerConnectionInterface;
+        class Context;
+        class PeerConnectionObject;
+        class UnityVideoRenderer;
+        class AudioTrackSinkAdapter;
+        enum class RTCSdpType;
+        enum class RTCPeerConnectionEventType;
+        struct MediaStreamEvent;
 
-enum class RTCSdpType { Offer, PrAnswer, Answer, Rollback };
+        using DelegateSetResolution = void (*)(int32_t*, int32_t*);
+        using DelegateMediaStreamOnAddTrack = void (*)(MediaStreamInterface*, MediaStreamTrackInterface*);
+        using DelegateMediaStreamOnRemoveTrack = void (*)(MediaStreamInterface*, MediaStreamTrackInterface*);
+        using DelegateVideoFrameResize = void (*)(UnityVideoRenderer* renderer, int width, int height);
+        using DelegateTransformedFrame = void (*)(FrameTransformerInterface*, TransformableFrameInterface*);
 
-struct RTCSessionDescription {
-  RTCSdpType type;
-  const char* sdp;
-};
+        enum class RTCPeerConnectionState
+        {
+            New,
+            Connecting,
+            Connected,
+            Disconnected,
+            Failed,
+            Closed
+        };
 
-// Callback Delegates
-using DelegateCreateSDSuccess = void (*)(PeerConnectionObject*,
-                                         RTCSdpType,
-                                         const char*);
+        enum class RTCIceConnectionState
+        {
+            New,
+            Checking,
+            Connected,
+            Completed,
+            Failed,
+            Disconnected,
+            Closed,
+            Max
+        };
 
-using DelegateCreateSDFailure = void (*)(PeerConnectionObject*,
-                                         webrtc::RTCErrorType,
-                                         const char*);
-using DelegateLocalSdpReady = void (*)(PeerConnectionObject*,
-                                       const char*,
-                                       const char*);
-using DelegateIceCandidate = void (*)(PeerConnectionObject*,
-                                      const char*,
-                                      const char*,
-                                      const int);
-using DelegateOnIceConnectionChange =
-    void (*)(PeerConnectionObject*,
-             webrtc::PeerConnectionInterface::IceConnectionState);
-using DelegateOnIceGatheringChange =
-    void (*)(PeerConnectionObject*,
-             webrtc::PeerConnectionInterface::IceGatheringState);
-using DelegateOnConnectionStateChange =
-    void (*)(PeerConnectionObject*,
-             webrtc::PeerConnectionInterface::PeerConnectionState);
-using DelegateOnDataChannel = void (*)(PeerConnectionObject*,
-                                       DataChannelInterface*);
-using DelegateOnRenegotiationNeeded = void (*)(PeerConnectionObject*);
-using DelegateOnTrack = void (*)(PeerConnectionObject*,
-                                 webrtc::RtpTransceiverInterface*);
-using DelegateOnRemoveTrack = void (*)(PeerConnectionObject*,
-                                       webrtc::RtpReceiverInterface*);
-////////////////////////////////////
+        enum class RTCSignalingState
+        {
+            Stable,
+            HaveLocalOffer,
+            HaveRemoteOffer,
+            HaveLocalPranswer,
+            HaveRemotePranswer,
+            Closed
+        };
 
-struct RTCOfferAnswerOptions {
-  bool iceRestart;
-  bool voiceActivityDetection;
-};
+        enum class RTCPeerConnectionEventType
+        {
+            ConnectionStateChange,
+            DataChannel,
+            IceCandidate,
+            IceConnectionStateChange,
+            Track
+        };
 
-class WebRTCPlugin {
- public:
-  PeerConnectionObject* _ContextCreatePeerConnection(
-      Context* context,
-      const PeerConnectionInterface::RTCConfiguration& config);
+        enum class RTCSdpType
+        {
+            Offer,
+            PrAnswer,
+            Answer,
+            Rollback
+        };
 
-  PeerConnectionObject* ContextCreatePeerConnection(Context* context);
-  void AddTracks(Context* context);
+        enum class SdpSemanticsType
+        {
+            UnifiedPlan
+        };
 
-  void PeerConnectionRegisterCallbackCreateSD(
-      PeerConnectionObject* obj,
-      DelegateCreateSDSuccess onSuccess,
-      DelegateCreateSDFailure onFailure);
+        enum class RTCErrorDetailType
+        {
+            DataChannelFailure,
+            DtlsFailure,
+            FingerprintFailure,
+            IdpBadScriptFailure,
+            IdpExecutionFailure,
+            IdpLoadFailure,
+            IdpNeedLogin,
+            IdpTimeout,
+            IdpTlsFailure,
+            IdpTokenExpired,
+            IdpTokenInvalid,
+            SctpFailure,
+            SdpSyntaxError,
+            HardwareEncoderNotAvailable,
+            HardwareEncoderError
+        };
 
-  void PeerConnectionRegisterOnIceCandidate(
-    PeerConnectionObject* obj,
-    DelegateIceCandidate callback);
+        enum class RTCIceCredentialType
+        {
+            Password,
+            OAuth
+        };
 
-  void PeerConnectionCreateOffer(PeerConnectionObject* obj,
-                                 const RTCOfferAnswerOptions* options);
+        enum class TrackKind
+        {
+            Audio,
+            Video
+        };
 
-  RTCErrorType PeerConnectionSetLocalDescription(
-        Context* context, PeerConnectionObject* obj, const RTCSessionDescription* desc, std::string& error);
+        struct RTCSessionDescription
+        {
+            RTCSdpType type;
+            char* sdp;
+        };
 
-  char* ConvertString(const std::string str);
+        struct RTCIceServer
+        {
+            char* credential;
+            char* credentialType;
+            char** urls;
+            int urlsLength;
+            char* username;
+        };
 
-  std::string GetEnvVarOrDefault(const char* env_var_name,
-                                 const char* default_value) {
-    std::string value;
-    const char* env_var = getenv(env_var_name);
-    if (env_var)
-      value = env_var;
+        struct RTCConfiguration
+        {
+            RTCIceServer* iceServers;
+            int iceServersLength;
+            char* iceServerPolicy;
+        };
 
-    if (value.empty())
-      value = default_value;
+        struct RTCIceCandidate
+        {
+            char* candidate;
+            char* sdpMid;
+            int sdpMLineIndex;
+        };
 
-    return value;
-  }
-  std::string GetPeerConnectionString() {
-    return GetEnvVarOrDefault("WEBRTC_CONNECT", "stun:stun.l.google.com:19302");
-  }
-};
-}  // namespace webrtc
+        struct RTCOfferAnswerOptions
+        {
+            bool iceRestart;
+            bool voiceActivityDetection;
+        };
+	}
+}
