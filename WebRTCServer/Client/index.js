@@ -11,14 +11,12 @@ const key = fs.readFileSync(path.join(__dirname, 'server.key'));
 const cert = fs.readFileSync(path.join(__dirname, 'server.cert'));
 
 const rootPath = "/views"
-const webrtc_write = "/tmp/webrtc_write";
-
-const webrtc_read = fs.createWriteStream("/tmp/webrtc_read");
 
 const httpsServer = https.createServer({ key, cert }, app);
 const wss = new WebSocket.Server({ server: httpsServer });
 
 let client;
+let webrtc_socket;
 
 app.use(express.static(path.join(__dirname, 'views')));
 
@@ -30,32 +28,35 @@ app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
 
-function createFifoStream() {
-  console.log('Opening FIFO stream...');
+const net = require('net');
 
-  const fifoStream = fs.createReadStream(webrtc_write, { encoding: 'utf8' });
+// Create a server
+const server = net.createServer((socket) => {
+    console.log('Webrtc Server connected');
+    webrtc_socket = socket;
+    // Event when receiving data from the client
+    socket.on('data', (data) => {
+        console.log(`Webrtc Server Sent: ${data}`);
+        if (client) {
+          (client).send(data.toString())
+        }
+    });
 
-  fifoStream.on('data', (data) => {
-    console.log('Data from FIFO:', data);
-    if (client) {
-      (client).send(data)
-    }
-  });
+    // Event when client disconnects
+    socket.on('end', () => {
+        console.log('Webrtc Server disconnected');
+    });
 
-  fifoStream.on('end', () => {
-    console.log('FIFO stream ended. Re-opening...');
-    // Wait a bit before reopening to prevent infinite loops in some cases
-    setTimeout(createFifoStream, 1000); // Recreate after a short delay
-  });
+    // Event if there is an error
+    socket.on('error', (err) => {
+        console.error('Webrtc Server error:', err);
+    });
+});
 
-  fifoStream.on('error', (err) => {
-    console.error('FIFO stream error:', err);
-    // Handle errors (e.g., FIFO pipe not available) and retry
-    setTimeout(createFifoStream, 1000); // Retry opening the pipe
-  });
-}
-
-createFifoStream();
+// Start the server and listen on the specified port
+server.listen(8081, '127.0.0.1', () => {
+    console.log(`TCP listening on 8081`);
+});
 
 wss.on('connection', (ws) => {
   console.log('New client connected');
@@ -65,10 +66,7 @@ wss.on('connection', (ws) => {
     if (Buffer.isBuffer(message)) {
       message = message.toString();
     }
-    webrtc_read.write("message", (err) => {
-      console.log("write error: "+err);
-      
-    });
+    webrtc_socket.write(message);
     console.log('Received message:', message);
   });
 

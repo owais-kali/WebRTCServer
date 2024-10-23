@@ -31,6 +31,9 @@ Conn.ondatachannel = event => {
   receiveChannel.onopen = () => {
     console.log('DataChannel is open and ready to communicate');
   };
+  receiveChannel.onmessage = (msg) =>{
+    console.log("Datachannel msg: "+msg.data);
+  }
 };
 
 const ws = new WebSocket('wss://192.168.1.22');

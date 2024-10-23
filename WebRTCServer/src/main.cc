@@ -44,6 +44,7 @@ PeerConnectionInterface::PeerConnectionState PeerConnectionState;
 void SendAll_ICEs() {
   if (ice_map.size() > 0) {
     for (auto&& ice : ice_map) {
+      JLogPrint(LoggingSeverity::LS_INFO, "Send ICE: %s", ice.c_str());
       fifo.Write(ice);
       if (webrtc::PeerConnectionState >
           PeerConnectionInterface::PeerConnectionState::kConnecting)
@@ -214,29 +215,32 @@ int StartNewStream(Context* ctx) {
   SendAll_ICEs();
 
   while(true) {
-    std::string data = fifo.Read();
-    // if(data.length() <=0){
-      std::this_thread::sleep_for(std::chrono::seconds(1));
-    //   continue;
-    // }
-    JLogPrint(LoggingSeverity::LS_INFO, "Data: %s", data.c_str());
+    // std::string data = fifo.Read();
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+    if (webrtc::PeerConnectionState != PeerConnectionInterface::PeerConnectionState::kConnected) {
+      break;
+    }
+    datachannel->Send(DataBuffer("Hello world"));
+    // JLogPrint(LoggingSeverity::LS_INFO, "Data: %s", data.c_str());
 
-    Json::Reader reader;
-    Json::Value root;
+    // Json::Reader reader;
+    // Json::Value root;
 
-    // Parse the JSON string
-    bool parsingSuccessful = reader.parse(data, root);
+    // // Parse the JSON string
+    // bool parsingSuccessful = reader.parse(data, root);
 
-    std::string sdp_mid = root["SDPMid"].asString();
-    int sdp_mlineindex = 0;
-    std::string sdp = root["Candidate"].asString();
-    webrtc::SdpParseError error;
-    std::unique_ptr<webrtc::IceCandidateInterface> candidate(
-        webrtc::CreateIceCandidate(sdp_mid, sdp_mlineindex, sdp, &error));
+    // std::string sdp_mid = root["SDPMid"].asString();
+    // int sdp_mlineindex = 0;
+    // std::string sdp = root["Candidate"].asString();
+    // webrtc::SdpParseError error;
+    // std::unique_ptr<webrtc::IceCandidateInterface> candidate(
+    //     webrtc::CreateIceCandidate(sdp_mid, sdp_mlineindex, sdp, &error));
 
-    JLogPrint(LoggingSeverity::LS_INFO, "AddIceCandidate: sdp:%s", sdp.c_str());
-    pco->connection->AddIceCandidate(candidate.get());
+    // JLogPrint(LoggingSeverity::LS_INFO, "AddIceCandidate: sdp:%s", sdp.c_str());
+    // pco->connection->AddIceCandidate(candidate.get());
   }
+  datachannel->Close();
+  pco->connection->Close();
   return 0;
 }
 
