@@ -819,6 +819,7 @@ if (is_linux || is_chromeos || is_win) {
       "../test:rtp_test_utils",
       "//third_party/abseil-cpp/absl/memory",
       "//third_party/abseil-cpp/absl/types:optional",
+      "//third_party/websocketpp"
     ]
     if (is_linux || is_chromeos) {
       sources += [
@@ -831,6 +832,12 @@ if (is_linux || is_chromeos || is_win) {
         "WebRTCServer/src/DataChannelObject.h",
         "WebRTCServer/src/UnityAudioTrackSource.cc",
         "WebRTCServer/src/UnityAudioTrackSource.h",
+        "WebRTCServer/src/SetLocalDescriptionObserver.cc",
+        "WebRTCServer/src/SetLocalDescriptionObserver.h",
+        "WebRTCServer/src/CreateSessionDescriptionObserver.cc",
+        "WebRTCServer/src/CreateSessionDescriptionObserver.h",
+        "WebRTCServer/src/SetRemoteDescriptionObserver.cc",
+        "WebRTCServer/src/SetRemoteDescriptionObserver.h",
         "WebRTCServer/src/Context.cc",
         "WebRTCServer/src/Context.h",
         "WebRTCServer/src/Fifo.cc",

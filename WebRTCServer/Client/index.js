@@ -12,12 +12,18 @@ const cert = fs.readFileSync(path.join(__dirname, 'server.cert'));
 
 const rootPath = "/views"
 const webrtc_write = "/tmp/webrtc_write";
-const webrtc_read = "webrtc_read";
+
+const webrtc_read = fs.createWriteStream("/tmp/webrtc_read");
+
+const httpsServer = https.createServer({ key, cert }, app);
+const wss = new WebSocket.Server({ server: httpsServer });
+
+let client;
 
 app.use(express.static(path.join(__dirname, 'views')));
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '/example1/index.html'));
+  res.sendFile(path.join(__dirname, '/example1/index.html'));
 })
 
 app.listen(port, () => {
@@ -31,6 +37,9 @@ function createFifoStream() {
 
   fifoStream.on('data', (data) => {
     console.log('Data from FIFO:', data);
+    if (client) {
+      (client).send(data)
+    }
   });
 
   fifoStream.on('end', () => {
@@ -48,17 +57,19 @@ function createFifoStream() {
 
 createFifoStream();
 
-const httpsServer = https.createServer({ key, cert }, app);
-const wss = new WebSocket.Server({ server: httpsServer });
-
 wss.on('connection', (ws) => {
   console.log('New client connected');
-
+  client = ws;
   // Handle messages received from the client
   ws.on('message', (message) => {
+    if (Buffer.isBuffer(message)) {
+      message = message.toString();
+    }
+    webrtc_read.write("message", (err) => {
+      console.log("write error: "+err);
+      
+    });
     console.log('Received message:', message);
-    // Echo the message back to the client
-    ws.send(`Server: You said '${message}'`);
   });
 
   // Handle client disconnection

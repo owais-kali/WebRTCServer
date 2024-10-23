@@ -18,7 +18,6 @@ namespace unity
 			case RTCSdpType::Rollback:
 				return webrtc::SdpType::kRollback;
 			}
-			// throw std::invalid_argument("Unknown RTCSdpType");
 		}
 
 		RTCSdpType ConvertSdpType(webrtc::SdpType type)
@@ -34,7 +33,6 @@ namespace unity
 			case webrtc::SdpType::kRollback:
 				return RTCSdpType::Rollback;
 			}
-			// throw std::invalid_argument("Unknown SdpType");
 		}
 
 		PeerConnectionObject::PeerConnectionObject(Context& context)
@@ -112,6 +110,7 @@ namespace unity
 			if (!_desc)
 			{
 				error = error_.description;
+				JLogPrint(LoggingSeverity::LS_INFO,"description: %s\n", error.c_str());
 				return RTCErrorType::SYNTAX_ERROR;
 			}
 			connection->SetRemoteDescription(std::move(_desc), observer);
