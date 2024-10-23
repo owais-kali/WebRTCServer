@@ -10,8 +10,9 @@
 #include "api/audio_codecs/builtin_audio_decoder_factory.h"
 #include "api/audio_codecs/builtin_audio_encoder_factory.h"
 
-// #include "UnityVideoEncoderFactory.h"
-// #include "UnityVideoDecoderFactory.h"
+#include "UnityVideoEncoderFactory.h"
+#include "UnityVideoDecoderFactory.h"
+#include "UnityVideoTrackSource.h"
 
 // #include "UnityAudioEncoderFactory.h"
 #include "UnityAudioTrackSource.h"
@@ -169,10 +170,10 @@ namespace unity
 			}
 		}
 
-		// rtc::scoped_refptr<UnityVideoTrackSource> Context::CreateVideoSource()
-		// {
-		// 	return rtc::make_ref_counted<UnityVideoTrackSource>(false, absl::nullopt, m_taskQueueFactory.get());
-		// }
+		rtc::scoped_refptr<UnityVideoTrackSource> Context::CreateVideoSource()
+		{
+			return rtc::make_ref_counted<UnityVideoTrackSource>(false, absl::nullopt, m_taskQueueFactory.get());
+		}
 
 		// rtc::scoped_refptr<AudioSourceInterface> Context::CreateAudioSource()
 		// {

@@ -15,9 +15,8 @@
   }
   
   video {
-    --width: 45%;
-    width: var(--width);
-    height: calc(var(--width) * 0.75);
+    width: 100%;
+    height: 100%;
     margin: 0 0 20px 0;
     vertical-align: top;
   }

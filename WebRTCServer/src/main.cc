@@ -142,6 +142,17 @@ int StartNewStream(Context* ctx) {
   ctx->GetDataChannelObject(datachannel)->RegisterOnOpen(OnDatachannelOpen);
 
   ///////////// VIDEO ////////////////////////////////////
+  rtc::scoped_refptr<VideoTrackSourceInterface> video_source;
+	rtc::scoped_refptr<VideoTrackInterface> video_track;
+  
+video_source = ctx->CreateVideoSource();
+ctx->AddRefPtr(video_source);
+
+//Create VideoTrack
+video_track = ctx->CreateVideoTrack("video", video_source.get());
+ctx->AddRefPtr(video_track);
+
+	///////////// VIDEO END ////////////////////////////////////
 
   // Create and Send Offer
   SetLocalDescriptionObserver::RegisterCallback(

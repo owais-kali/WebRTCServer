@@ -4,7 +4,7 @@
 #include "rtc_base/ref_count.h"
 #include "PeerConnectionObject.h"
 #include "DummyAudioDevice.h"
-// #include "UnityVideoTrackSource.h"
+#include "UnityVideoTrackSource.h"
 
 namespace unity
 {
@@ -76,7 +76,7 @@ namespace unity
             // rtc::scoped_refptr<AudioSourceInterface> CreateAudioSource();
 
             // Video Source
-            // rtc::scoped_refptr<UnityVideoTrackSource> CreateVideoSource();
+            rtc::scoped_refptr<UnityVideoTrackSource> CreateVideoSource();
 
             // MediaStreamTrack
             rtc::scoped_refptr<VideoTrackInterface>

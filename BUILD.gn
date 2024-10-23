@@ -844,6 +844,16 @@ if (is_linux || is_chromeos || is_win) {
         "WebRTCServer/src/Fifo.h",
         "WebRTCServer/src/Logger.cc",
         "WebRTCServer/src/main.cc",
+        "WebRTCServer/src/UnityVideoEncoderFactory.cc",
+        "WebRTCServer/src/UnityVideoEncoderFactory.h",
+        "WebRTCServer/src/UnityVideoDecoderFactory.cc",
+        "WebRTCServer/src/UnityVideoDecoderFactory.h",
+        "WebRTCServer/src/UnityVideoTrackSource.cc",
+        "WebRTCServer/src/UnityVideoTrackSource.h",
+        "WebRTCServer/src/VideoFrame.cc",
+        "WebRTCServer/src/VideoFrame.h",
+        "WebRTCServer/src/VideoFrameAdapter.cc",
+        "WebRTCServer/src/VideoFrameAdapter.h",
       ]
       cflags = [ "-Wno-deprecated-declarations" ]
       libs = [
