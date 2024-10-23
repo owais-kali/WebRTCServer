@@ -1,0 +1,23 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build WebRTCServer",
+            "type": "shell",
+            "command": "ninja",
+            "args": ["WebRTCServer"],
+            "options": {
+                "env": {
+                    "PATH": "/home/dev2/owais/WEBRTC/depot_tools:${env:PATH}"
+                },
+                "cwd": "${workspaceFolder}/out/Debug"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "detail": "Run ninja to build the project"
+        }
+    ]
+}

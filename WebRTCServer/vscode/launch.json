@@ -1,0 +1,79 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "peerconnection_server",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/out/Debug/peerconnection_server",  // Path to the built executable
+            "args": [],  // If your program requires arguments, specify them here
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}/out/Debug/",  // The working directory (where the executable resides)
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "",
+            "miDebuggerPath": "/usr/bin/gdb",  // Make sure GDB is installed
+            "sourceFileMap": {
+                "/home/dev2/owais/WEBRTC/webrtc-checkout/src": "${workspaceFolder}"  // Path to the source code
+            },
+            "miDebuggerArgs": "",
+            "logging": {
+                "trace": true,
+                "engineLogging": true,
+                "programOutput": true,
+                "exceptions": true
+            }
+        },
+        {
+            "name": "WebRTCServer",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/out/Debug/WebRTCServer",  // Path to the built executable
+            "args": [],  // If your program requires arguments, specify them here
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/out/Debug/",  // The working directory (where the executable resides)
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build WebRTCServer",
+            "miDebuggerPath": "/usr/bin/gdb",  // Make sure GDB is installed
+            "sourceFileMap": {
+                "/home/dev2/owais/WEBRTC/webrtc-checkout/src": "${workspaceFolder}"  // Path to the source code
+            },
+            "miDebuggerArgs": "",
+            "logging": {
+                "trace": true,
+                "engineLogging": true,
+                "programOutput": true,
+                "exceptions": true
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "NodeJS",
+            "program": "${workspaceFolder}/examples/WebRTCServer/Client/index.js", // Adjust the path to your main Node.js file
+            "runtimeExecutable": "node",
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal",
+            "env": {
+              "NODE_ENV": "development"
+            }
+          },
+    ]
+}
