@@ -100,7 +100,8 @@ namespace unity
         private:
             std::unique_ptr<rtc::Thread> m_workerThread;
             std::unique_ptr<rtc::Thread> m_signalingThread;
-            std::unique_ptr<TaskQueueFactory> m_taskQueueFactory;
+            // std::unique_ptr<TaskQueueFactory> m_taskQueueFactory;
+            TaskQueueFactory* m_taskQueueFactory;
             rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> m_peerConnectionFactory;
             rtc::scoped_refptr<DummyAudioDevice> m_audioDevice;
             std::map<const PeerConnectionObject*, std::unique_ptr<PeerConnectionObject>> m_mapClients;

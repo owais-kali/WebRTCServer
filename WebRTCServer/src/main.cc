@@ -46,40 +46,37 @@ namespace webrtc {
 PeerConnectionInterface::PeerConnectionState PeerConnectionState;
 }
 
-std::vector<std::string> Split(const std::string& str, const std::string& delimiter)
-{
-	std::vector<std::string> dst;
-	std::string s = str;
-	size_t pos = 0;
+std::vector<std::string> Split(const std::string& str,
+                               const std::string& delimiter) {
+  std::vector<std::string> dst;
+  std::string s = str;
+  size_t pos = 0;
 
-	if (str.empty())
-		return dst;
+  if (str.empty())
+    return dst;
 
-	while (true)
-	{
-		pos = s.find(delimiter);
-		size_t length = pos;
-		if (pos == std::string::npos)
-			length = str.length();
-		dst.push_back(s.substr(0, length));
-		if (pos == std::string::npos)
-			break;
-		s.erase(0, pos + delimiter.length());
-	}
-	return dst;
+  while (true) {
+    pos = s.find(delimiter);
+    size_t length = pos;
+    if (pos == std::string::npos)
+      length = str.length();
+    dst.push_back(s.substr(0, length));
+    if (pos == std::string::npos)
+      break;
+    s.erase(0, pos + delimiter.length());
+  }
+  return dst;
 }
 
-std::map<std::string, std::string> ConvertSdp(const std::string& src)
-{
-	std::map<std::string, std::string> map;
-	std::vector<std::string> vec = Split(src, ";");
+std::map<std::string, std::string> ConvertSdp(const std::string& src) {
+  std::map<std::string, std::string> map;
+  std::vector<std::string> vec = Split(src, ";");
 
-	for (const auto& str : vec)
-	{
-		std::vector<std::string> pair = Split(str, "=");
-		map.emplace(pair[0], pair[1]);
-	}
-	return map;
+  for (const auto& str : vec) {
+    std::vector<std::string> pair = Split(str, "=");
+    map.emplace(pair[0], pair[1]);
+  }
+  return map;
 }
 
 void SendAll_ICEs() {
@@ -265,13 +262,20 @@ int StartNewStream(Context* ctx) {
         fifo.Write(jsonString);
         JLogPrint(LoggingSeverity::LS_INFO, "SENT OFFER: \n%s\n%s", sdp.c_str(),
                   error);
+
+        std::ofstream file("offer.json");
+        file << jsonString;
       });
 
   auto csdo = unity::webrtc::CreateSessionDescriptionObserver::Create(pco);
   pco->CreateOffer(RTCOfferAnswerOptions(), csdo.get());
 
   std::string answer = fifo.Read();
-
+  {
+    std::ofstream answer_file("answer.json");
+    answer_file << answer;
+    answer_file.close();
+  }
   // Read and Set Answer
   SetRemoteDescriptionObserver::RegisterCallback(
       [](PeerConnectionObject* pco, SetRemoteDescriptionObserver* srdo,
@@ -288,13 +292,9 @@ int StartNewStream(Context* ctx) {
   Json::Reader reader;
   Json::Value root;
 
-  const char* ans = answer.c_str();
   // Parse the JSON string
   bool parsingSuccessful = reader.parse(answer, root);
   auto sdpData = root["sdp"]["SDPData"].asString();
-  const char* ans2 = sdpData.c_str();
-  JLogPrint(LoggingSeverity::LS_INFO, "GOT ANSWER1: \n%s \nGOT ANSWER1 END", ans);
-  JLogPrint(LoggingSeverity::LS_INFO, "GOT ANSWER2: \n%s", sdpData.c_str());
   const RTCSessionDescription desc = {RTCSdpType::Answer,
                                       (char*)sdpData.c_str()};
   std::string error_;
