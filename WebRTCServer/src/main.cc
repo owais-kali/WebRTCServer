@@ -17,12 +17,17 @@
 #include "SetLocalDescriptionObserver.h"
 #include "SetRemoteDescriptionObserver.h"
 #include "rtc_base/strings/json.h"
+#include "video.h"
 
 using namespace webrtc;
 using namespace unity::webrtc;
 
 #define UNITY_INTERFACE_EXPORT
 #define JLogPrint unity::webrtc::JLogPrint
+
+#define VIDEO_MIN_BITRATE 14999999
+#define VIDEO_MAX_BITRATE 15000000
+#define FPS 60
 
 Fifo fifo;
 std::unique_ptr<webrtc::Clock> s_clock;
@@ -41,11 +46,48 @@ namespace webrtc {
 PeerConnectionInterface::PeerConnectionState PeerConnectionState;
 }
 
+std::vector<std::string> Split(const std::string& str, const std::string& delimiter)
+{
+	std::vector<std::string> dst;
+	std::string s = str;
+	size_t pos = 0;
+
+	if (str.empty())
+		return dst;
+
+	while (true)
+	{
+		pos = s.find(delimiter);
+		size_t length = pos;
+		if (pos == std::string::npos)
+			length = str.length();
+		dst.push_back(s.substr(0, length));
+		if (pos == std::string::npos)
+			break;
+		s.erase(0, pos + delimiter.length());
+	}
+	return dst;
+}
+
+std::map<std::string, std::string> ConvertSdp(const std::string& src)
+{
+	std::map<std::string, std::string> map;
+	std::vector<std::string> vec = Split(src, ";");
+
+	for (const auto& str : vec)
+	{
+		std::vector<std::string> pair = Split(str, "=");
+		map.emplace(pair[0], pair[1]);
+	}
+	return map;
+}
+
 void SendAll_ICEs() {
   if (ice_map.size() > 0) {
     for (auto&& ice : ice_map) {
       JLogPrint(LoggingSeverity::LS_INFO, "Send ICE: %s", ice.c_str());
       fifo.Write(ice);
+      std::this_thread::sleep_for(std::chrono::milliseconds(200));
       if (webrtc::PeerConnectionState >
           PeerConnectionInterface::PeerConnectionState::kConnecting)
         break;
@@ -143,16 +185,50 @@ int StartNewStream(Context* ctx) {
 
   ///////////// VIDEO ////////////////////////////////////
   rtc::scoped_refptr<VideoTrackSourceInterface> video_source;
-	rtc::scoped_refptr<VideoTrackInterface> video_track;
-  
-video_source = ctx->CreateVideoSource();
-ctx->AddRefPtr(video_source);
+  rtc::scoped_refptr<VideoTrackInterface> video_track;
 
-//Create VideoTrack
-video_track = ctx->CreateVideoTrack("video", video_source.get());
-ctx->AddRefPtr(video_track);
+  video_source = ctx->CreateVideoSource();
+  ctx->AddRefPtr(video_source);
 
-	///////////// VIDEO END ////////////////////////////////////
+  // Create VideoTrack
+  video_track = ctx->CreateVideoTrack("video", video_source.get());
+  ctx->AddRefPtr(video_track);
+
+  {
+    // Create Video Transceiver
+    RtpTransceiverInit TransceiverInit;
+    TransceiverInit.direction = RtpTransceiverDirection::kSendOnly;
+    RtpEncodingParameters encoding_param1;
+    encoding_param1.active = true;
+    encoding_param1.max_bitrate_bps = VIDEO_MAX_BITRATE;
+    encoding_param1.min_bitrate_bps = VIDEO_MIN_BITRATE;
+    encoding_param1.max_framerate = FPS;
+    TransceiverInit.send_encodings.push_back(encoding_param1);
+    auto transceiver_or_error =
+        pco->connection->AddTransceiver(video_track, TransceiverInit);
+    if (!transceiver_or_error.error().ok()) {
+      JLogPrint(LoggingSeverity::LS_ERROR, "Cannot add Transceiver");
+    }
+    auto transceiver = transceiver_or_error.value().get();
+
+    // Set Codec Preferences
+    RtpCodecCapability codec_capability;
+    codec_capability.clock_rate = 90000;
+    codec_capability.kind = cricket::MediaType::MEDIA_TYPE_VIDEO;
+    codec_capability.name = "H264";
+
+    // For PC
+    // implementation_name=NvCodec;level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=420033
+    // For Iphone Safari
+    // implementation_name=NvCodec;level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e033
+    codec_capability.parameters = ConvertSdp(
+        "implementation_name=NvCodec;level-asymmetry-allowed=1;packetization-"
+        "mode=1;profile-level-id=42e033");
+    std::vector<RtpCodecCapability> _codecs = {codec_capability};
+    transceiver->SetCodecPreferences(_codecs);
+  }
+
+  ///////////// VIDEO END ////////////////////////////////////
 
   // Create and Send Offer
   SetLocalDescriptionObserver::RegisterCallback(
@@ -212,10 +288,13 @@ ctx->AddRefPtr(video_track);
   Json::Reader reader;
   Json::Value root;
 
+  const char* ans = answer.c_str();
   // Parse the JSON string
   bool parsingSuccessful = reader.parse(answer, root);
-  std::string sdpData = root["sdp"]["SDPData"].asString();
-  JLogPrint(LoggingSeverity::LS_INFO, "GOT ANSWER: \n%s", sdpData.c_str());
+  auto sdpData = root["sdp"]["SDPData"].asString();
+  const char* ans2 = sdpData.c_str();
+  JLogPrint(LoggingSeverity::LS_INFO, "GOT ANSWER1: \n%s \nGOT ANSWER1 END", ans);
+  JLogPrint(LoggingSeverity::LS_INFO, "GOT ANSWER2: \n%s", sdpData.c_str());
   const RTCSessionDescription desc = {RTCSdpType::Answer,
                                       (char*)sdpData.c_str()};
   std::string error_;
@@ -225,38 +304,41 @@ ctx->AddRefPtr(video_track);
   std::this_thread::sleep_for(std::chrono::seconds(1));
   SendAll_ICEs();
 
-  while(true) {
-    // std::string data = fifo.Read();
-    std::this_thread::sleep_for(std::chrono::seconds(5));
-    if (webrtc::PeerConnectionState != PeerConnectionInterface::PeerConnectionState::kConnected) {
+  while (true) {
+    std::string data = fifo.Read();
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    if (webrtc::PeerConnectionState ==
+        PeerConnectionInterface::PeerConnectionState::kConnected) {
       break;
     }
-    datachannel->Send(DataBuffer("Hello world"));
-    // JLogPrint(LoggingSeverity::LS_INFO, "Data: %s", data.c_str());
+    JLogPrint(LoggingSeverity::LS_INFO, "Data: %s", data.c_str());
+    Json::Reader reader;
+    Json::Value root;
 
-    // Json::Reader reader;
-    // Json::Value root;
+    // Parse the JSON string
+    bool parsingSuccessful = reader.parse(data, root);
 
-    // // Parse the JSON string
-    // bool parsingSuccessful = reader.parse(data, root);
+    std::string sdp_mid = root["SDPMid"].asString();
+    int sdp_mlineindex = 0;
+    std::string sdp = root["Candidate"].asString();
+    webrtc::SdpParseError error;
+    std::unique_ptr<webrtc::IceCandidateInterface> candidate(
+        webrtc::CreateIceCandidate(sdp_mid, sdp_mlineindex, sdp, &error));
 
-    // std::string sdp_mid = root["SDPMid"].asString();
-    // int sdp_mlineindex = 0;
-    // std::string sdp = root["Candidate"].asString();
-    // webrtc::SdpParseError error;
-    // std::unique_ptr<webrtc::IceCandidateInterface> candidate(
-    //     webrtc::CreateIceCandidate(sdp_mid, sdp_mlineindex, sdp, &error));
-
-    // JLogPrint(LoggingSeverity::LS_INFO, "AddIceCandidate: sdp:%s", sdp.c_str());
-    // pco->connection->AddIceCandidate(candidate.get());
+    JLogPrint(LoggingSeverity::LS_INFO, "AddIceCandidate: sdp:%s", sdp.c_str());
+    pco->connection->AddIceCandidate(candidate.get());
   }
+
+  datachannel->Send(DataBuffer("Hello world"));
+  video vid(video_source.get());
+  vid.Start();
+
   datachannel->Close();
   pco->connection->Close();
   return 0;
 }
 
 int main() {
-
   ContextManager* ctx_manager = ContextManager::GetInstance();
   ContextDependencies dep{};
   auto ctx = ctx_manager->CreateContext(1, dep);

@@ -35,8 +35,8 @@ Fifo::~Fifo(){
 }
 
 std::string Fifo::Read(){
-    char buffer[1024] = {0};
-    read(sock, buffer, 1024);
+    char buffer[20480] = {0};
+    read(sock, buffer, 20480);
     std::string serverResponse(buffer);
     return serverResponse;
 }

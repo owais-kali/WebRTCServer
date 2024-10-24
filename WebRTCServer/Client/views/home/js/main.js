@@ -17,8 +17,8 @@ const SignalingType = {
 
 const CallBtn = document.getElementById('CallBtn');
 
-const localVideo = document.getElementById('localVideo');
-const remoteVideo = document.getElementById('remoteVideo');
+const video = document.getElementById('remoteVideo');
+const media_stream = new MediaStream();
 
 let pc;
 let localStream;
@@ -36,11 +36,18 @@ Conn.ondatachannel = event => {
   }
 };
 
+Conn.ontrack = (evt)=>{
+  if (evt.track.kind == "video") {
+    media_stream.addTrack(evt.track)
+  }
+}
+
 const ws = new WebSocket('wss://192.168.1.22');
 
 // Handle connection open
 ws.onopen = function () {
   console.log('Connected to WebSocket server');
+  video.srcObject = media_stream;
 };
 
 Conn.onicecandidate = (obj, ev) => {

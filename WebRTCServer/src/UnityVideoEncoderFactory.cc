@@ -133,9 +133,7 @@ class UnityVideoEncoder : public VideoEncoder {
     m_encodedImage.set_size(lastfiledata.length);
 
     // m_h264BitstreamParser.ParseBitstream(m_encodedImage);
-    // m_encodedImage.qp_ =
-    //     config::video
-    //         .qp;  // m_h264BitstreamParser.GetLastSliceQp().value_or(25);
+    m_encodedImage.qp_ = 28;  // m_h264BitstreamParser.GetLastSliceQp().value_or(25);
     // JLogPrint(LoggingSeverity::LS_INFO,"m_encodedImage.qp_: %d",
     // m_encodedImage.qp_);
     CodecSpecificInfo codecInfo;
