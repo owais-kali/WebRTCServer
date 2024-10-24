@@ -854,6 +854,8 @@ if (is_linux || is_chromeos || is_win) {
         "WebRTCServer/src/VideoFrame.h",
         "WebRTCServer/src/VideoFrameAdapter.cc",
         "WebRTCServer/src/VideoFrameAdapter.h",
+        "WebRTCServer/src/video.cc",
+        "WebRTCServer/src/video.h",
       ]
       cflags = [ "-Wno-deprecated-declarations" ]
       libs = [
