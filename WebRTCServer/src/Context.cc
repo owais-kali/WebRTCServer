@@ -14,6 +14,13 @@
 #include "api/audio_codecs/audio_encoder_factory.h"
 #include "api/audio_codecs/builtin_audio_decoder_factory.h"
 #include "api/audio_codecs/builtin_audio_encoder_factory.h"
+#include "api/call/call_factory_interface.h"
+#include "api/field_trials.h"
+#include "api/peer_connection_interface.h"
+#include "api/rtc_event_log/rtc_event_log_factory.h"
+#include "api/scoped_refptr.h"
+#include "api/task_queue/default_task_queue_factory.h"
+#include "api/transport/field_trial_based_config.h"
 #include "api/video_codecs/video_decoder_factory.h"
 #include "api/video_codecs/video_decoder_factory_template.h"
 #include "api/video_codecs/video_decoder_factory_template_dav1d_adapter.h"
@@ -26,21 +33,12 @@
 #include "api/video_codecs/video_encoder_factory_template_libvpx_vp8_adapter.h"
 #include "api/video_codecs/video_encoder_factory_template_libvpx_vp9_adapter.h"
 #include "api/video_codecs/video_encoder_factory_template_open_h264_adapter.h"
-#include "pch.h"
-
-
-#include "api/call/call_factory_interface.h"
-#include "api/peer_connection_interface.h"
-#include "api/rtc_event_log/rtc_event_log_factory.h"
-#include "api/scoped_refptr.h"
-#include "api/task_queue/default_task_queue_factory.h"
-#include "api/transport/field_trial_based_config.h"
 #include "media/base/media_engine.h"
 #include "media/engine/webrtc_media_engine.h"
 #include "modules/audio_device/include/audio_device.h"
 #include "modules/audio_processing/include/audio_processing.h"
+#include "pch.h"
 #include "rtc_base/thread.h"
-#include "api/field_trials.h"
 
 using namespace ::webrtc;
 
@@ -105,11 +103,16 @@ ContextManager::~ContextManager() {
 
 Context::Context(ContextDependencies& context_dependencies)
     : m_workerThread(rtc::Thread::CreateWithSocketServer()),
-      m_signalingThread(rtc::Thread::CreateWithSocketServer()) {
+      m_signalingThread(rtc::Thread::CreateWithSocketServer()),
+      m_taskQueueFactory(CreateDefaultTaskQueueFactory()) {
   m_workerThread->Start();
   m_signalingThread->Start();
 
   rtc::InitializeSSL();
+
+  m_audioDevice = m_workerThread->BlockingCall([&]() {
+    return rtc::make_ref_counted<DummyAudioDevice>(m_taskQueueFactory.get());
+  });
 
   std::unique_ptr<webrtc::VideoEncoderFactory> videoEncoderFactory =
       std::make_unique<UnityVideoEncoderFactory>(context_dependencies.device);
@@ -118,46 +121,17 @@ Context::Context(ContextDependencies& context_dependencies)
       std::make_unique<UnityVideoDecoderFactory>(context_dependencies.device,
                                                  context_dependencies.profiler);
 
-  // m_peerConnectionFactory = CreatePeerConnectionFactory(
-  //     m_workerThread.get(), m_workerThread.get(), m_signalingThread.get(),
-  //     m_audioDevice, webrtc::CreateBuiltinAudioEncoderFactory(),
-  //     webrtc::CreateBuiltinAudioDecoderFactory(),
-  //     std::move(videoEncoderFactory), std::move(videoDecoderFactory),
-  //     nullptr, nullptr);
+std::unique_ptr<FieldTrials> field_trials = FieldTrials::CreateNoGlobal(
+    "WebRTC-FlexFEC-03-Advertised/Enabled/"
+    "WebRTC-FlexFEC/Enabled/"
+    "WebRTC-FlexFEC-03/Enabled/");
 
-  PeerConnectionFactoryDependencies dependencies;
-
-  std::unique_ptr<FieldTrials> field_trials =
-      FieldTrials::CreateNoGlobal("WebRTC-FlexFEC-03-Advertised/Enabled/");
-
-  dependencies.network_thread = m_workerThread.get();
-  dependencies.worker_thread = m_workerThread.get();
-  dependencies.signaling_thread = m_signalingThread.get();
-  dependencies.task_queue_factory = CreateDefaultTaskQueueFactory(field_trials.get());
-  dependencies.call_factory = CreateCallFactory();
-  dependencies.event_log_factory = std::make_unique<RtcEventLogFactory>(
-    dependencies.task_queue_factory.get());
-  dependencies.trials = std::move(field_trials);
-
-  dependencies.socket_factory = m_workerThread->socketserver();
-  m_taskQueueFactory = dependencies.task_queue_factory.get();
-
-  m_audioDevice = m_workerThread->BlockingCall([&]() {
-    return rtc::make_ref_counted<DummyAudioDevice>(m_taskQueueFactory);
-  });
-
-  cricket::MediaEngineDependencies media_dependencies;
-  media_dependencies.video_encoder_factory = std::move(videoEncoderFactory);
-  media_dependencies.video_decoder_factory = std::move(videoDecoderFactory);
-  media_dependencies.adm = std::move(m_audioDevice);
-  media_dependencies.audio_encoder_factory = webrtc::CreateBuiltinAudioEncoderFactory();
-  media_dependencies.audio_decoder_factory = webrtc::CreateBuiltinAudioDecoderFactory();
-  media_dependencies.trials = dependencies.trials.get();
-
-  dependencies.media_engine =
-      cricket::CreateMediaEngine(std::move(media_dependencies));
-
-  m_peerConnectionFactory = CreateModularPeerConnectionFactory(std::move(dependencies));
+  m_peerConnectionFactory = CreatePeerConnectionFactory(
+      m_workerThread.get(), m_workerThread.get(), m_signalingThread.get(),
+      m_audioDevice, webrtc::CreateBuiltinAudioEncoderFactory(),
+      webrtc::CreateBuiltinAudioDecoderFactory(),
+      std::move(videoEncoderFactory), std::move(videoDecoderFactory), nullptr,
+      nullptr, nullptr, std::move(field_trials));
 }
 
 Context::~Context() {
@@ -185,7 +159,7 @@ Context::~Context() {
 
 rtc::scoped_refptr<UnityVideoTrackSource> Context::CreateVideoSource() {
   return rtc::make_ref_counted<UnityVideoTrackSource>(false, absl::nullopt,
-                                                      m_taskQueueFactory);
+                                                      m_taskQueueFactory.get());
 }
 
 // rtc::scoped_refptr<AudioSourceInterface> Context::CreateAudioSource()

@@ -218,9 +218,13 @@ int StartNewStream(Context* ctx) {
     // implementation_name=NvCodec;level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=420033
     // For Iphone Safari
     // implementation_name=NvCodec;level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e033
-    codec_capability.parameters = ConvertSdp(
-        "implementation_name=NvCodec;level-asymmetry-allowed=1;packetization-"
-        "mode=1;profile-level-id=42e033");
+codec_capability.parameters = ConvertSdp(
+    "implementation_name=NvCodec;"
+    "level-asymmetry-allowed=1;"
+    "packetization-mode=1;"
+    "profile-level-id=42e033;"
+    "flexfec-03=enabled;repair-window=2000000"
+    );
     std::vector<RtpCodecCapability> _codecs = {codec_capability};
     transceiver->SetCodecPreferences(_codecs);
   }

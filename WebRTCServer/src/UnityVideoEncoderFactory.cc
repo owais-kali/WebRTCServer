@@ -20,6 +20,26 @@
 
 #include "Logger.h"
 
+using DelegateOnPLI = void (*)();
+namespace webrtc {
+class PeerConnectionInterface {
+ public:
+  enum class PeerConnectionState {
+    kNew,
+    kConnecting,
+    kConnected,
+    kDisconnected,
+    kFailed,
+    kClosed,
+  };
+};
+
+extern PeerConnectionInterface::PeerConnectionState PeerConnectionState;
+
+// void RegisterOnDiscardPackets(DelegateOnDiscardPackets cb);
+void RegisterOnPLICallback(DelegateOnPLI cb);
+}  // namespace webrtc
+
 struct FileData {
   uint8_t* data;  // Pointer to file data
   size_t length;  // Length of the file data
@@ -28,18 +48,17 @@ struct FileData {
 namespace unity {
 namespace webrtc {
 EncodedImageCallback* m_encodedCompleteCallback;
-
+int fileNumber = 0;
 class UnityVideoEncoder : public VideoEncoder {
  public:
   H264BitstreamParser m_h264BitstreamParser;
 
-  int fileNumber = 0;
   FileData lastfiledata;
 
   // Function to read the next file in sequence (e.g., 0.h264, 1.h264, etc.)
   FileData readNextFile(const std::string& directory) {
     FileData fileData = {nullptr, 0};
-
+  again:
     // Create the file name using directory and fileNumber
     std::string fileName =
         directory + "/" + std::to_string(fileNumber) + ".h264";
@@ -49,7 +68,9 @@ class UnityVideoEncoder : public VideoEncoder {
                        std::ios::in | std::ios::binary | std::ios::ate);
     if (!file.is_open()) {
       std::cerr << "Failed to open file: " << fileName << std::endl;
-      return fileData;  // Return empty fileData if the file cannot be opened
+      fileNumber = 0;
+      goto again;
+      // return fileData;  // Return empty fileData if the file cannot be opened
     }
 
     // Get the size of the file
@@ -82,21 +103,19 @@ class UnityVideoEncoder : public VideoEncoder {
   int32_t InitEncode(const VideoCodec* codec_settings,
                      int32_t number_of_cores,
                      size_t max_payload_size) override {
-    JLogPrint(LoggingSeverity::LS_INFO, "Init Encode");
+    webrtc::RegisterOnPLICallback([]() { fileNumber = 0; });
     return WEBRTC_VIDEO_CODEC_OK;
   }
   int InitEncode(const VideoCodec* codec_settings,
                  const VideoEncoder::Settings& settings) override {
-    JLogPrint(LoggingSeverity::LS_INFO, "Init Encode");
+    webrtc::RegisterOnPLICallback([]() { fileNumber = 0; });
     return WEBRTC_VIDEO_CODEC_OK;
   }
 
   int kVideoFrameKey_COUNT = 0;
   int32_t Encode(const VideoFrame& frame,
                  const std::vector<VideoFrameType>* frame_types) override {
-    JLogPrint(LoggingSeverity::LS_INFO, "Encode");
-
-    if (lastfiledata.data != nullptr) {
+    if (fileNumber != 0) {
       delete lastfiledata.data;
     }
 
@@ -133,7 +152,8 @@ class UnityVideoEncoder : public VideoEncoder {
     m_encodedImage.set_size(lastfiledata.length);
 
     // m_h264BitstreamParser.ParseBitstream(m_encodedImage);
-    m_encodedImage.qp_ = 28;  // m_h264BitstreamParser.GetLastSliceQp().value_or(25);
+    m_encodedImage.qp_ =
+        28;  // m_h264BitstreamParser.GetLastSliceQp().value_or(25);
     // JLogPrint(LoggingSeverity::LS_INFO,"m_encodedImage.qp_: %d",
     // m_encodedImage.qp_);
     CodecSpecificInfo codecInfo;
@@ -209,8 +229,7 @@ std::unique_ptr<VideoEncoder> UnityVideoEncoderFactory::CreateVideoEncoder(
   return std::make_unique<UnityVideoEncoder>();
 }
 
-UnityVideoEncoderFactory::UnityVideoEncoderFactory(
-    IGraphicsDevice* gfxDevice)
+UnityVideoEncoderFactory::UnityVideoEncoderFactory(IGraphicsDevice* gfxDevice)
     : factories_() {}
 
 UnityVideoEncoderFactory::~UnityVideoEncoderFactory() {}
